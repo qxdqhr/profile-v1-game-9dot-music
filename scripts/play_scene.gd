@@ -24,10 +24,10 @@ var _meta_path := FALLBACK_META
 
 @onready var _hud: Label = $UI/HUD
 @onready var _feedback_label: Label = $UI/Feedback
-@onready var _pause_btn: Button = $UI/Controls/PauseBtn
+@onready var _pause_btn: TextureButton = $UI/Controls/PauseBtn
 @onready var _pause_menu: ColorRect = $UI/PauseMenu
-@onready var _restart_btn: Button = $UI/PauseMenu/Row/RestartBtn
-@onready var _songs_btn: Button = $UI/PauseMenu/Row/SongsBtn
+@onready var _restart_btn: TextureButton = $UI/PauseMenu/Row/RestartBtn
+@onready var _songs_btn: TextureButton = $UI/PauseMenu/Row/SongsBtn
 @onready var _overlay: ColorRect = $UI/Overlay
 @onready var _over_msg: Label = $UI/Overlay/VBox/Msg
 @onready var _start_btn: Button = $UI/Overlay/VBox/StartBtn
@@ -37,11 +37,16 @@ var _meta_path := FALLBACK_META
 @onready var _video: VideoStreamPlayer = $Video
 @onready var _grid_layer: Control = $GridLayer
 
+var _tex_pause: Texture2D
+var _tex_play: Texture2D
+
 func _ready() -> void:
 	custom_minimum_size = Vector2(NineDotConfig.VIEW_W, NineDotConfig.VIEW_H)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_diff_key = PlaySession.diff if String(PlaySession.diff) != "" else "normal"
 	_meta_path = PlaySession.meta_path if String(PlaySession.meta_path) != "" else FALLBACK_META
+	_tex_pause = load("res://assets/icons/pause.svg") as Texture2D
+	_tex_play = load("res://assets/icons/play.svg") as Texture2D
 	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
 	_clock = NineDotClock.new()
 	add_child(_clock)
@@ -93,7 +98,7 @@ func _reset_to_ready() -> void:
 	_start_btn.visible = true
 	_retry_btn.visible = false
 	_back_btn.visible = true
-	_pause_btn.text = "停"
+	_set_pause_icon(false)
 	_pause_menu.visible = false
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
@@ -131,7 +136,7 @@ func _on_start() -> void:
 	_status = Status.PLAYING
 	_overlay.visible = false
 	_pause_menu.visible = false
-	_pause_btn.text = "停"
+	_set_pause_icon(false)
 	_feedback = "开始！"
 	_update_hud()
 
@@ -151,12 +156,18 @@ func _toggle_pause() -> void:
 	elif _status == Status.PAUSED:
 		_leave_pause()
 
+func _set_pause_icon(paused: bool) -> void:
+	if _pause_btn == null:
+		return
+	_pause_btn.texture_normal = _tex_play if paused else _tex_pause
+	_pause_btn.tooltip_text = "继续" if paused else "暂停"
+
 func _enter_pause() -> void:
 	_status = Status.PAUSED
 	_clock.pause()
 	if _video.stream:
 		_video.paused = true
-	_pause_btn.text = "续"
+	_set_pause_icon(true)
 	_pause_menu.visible = true
 	_feedback = ""
 	_update_hud()
@@ -166,7 +177,7 @@ func _leave_pause() -> void:
 	_clock.resume()
 	if _video.stream:
 		_video.paused = false
-	_pause_btn.text = "停"
+	_set_pause_icon(false)
 	_pause_menu.visible = false
 	_feedback = "继续"
 	_update_hud()

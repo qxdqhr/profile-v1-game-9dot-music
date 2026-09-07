@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/play_scene.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/icons/pause.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/icons/restart.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/icons/songs.svg" id="4"]
 
 [node name="Play" type="Control"]
 layout_mode = 3
@@ -70,12 +73,13 @@ offset_top = 8.0
 offset_right = 348.0
 offset_bottom = 52.0
 
-[node name="PauseBtn" type="Button" parent="UI/Controls"]
+[node name="PauseBtn" type="TextureButton" parent="UI/Controls"]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "停"
-flat = true
+texture_normal = ExtResource("2")
+ignore_texture_size = true
+stretch_mode = 5
+tooltip_text = "暂停"
 
 [node name="PauseMenu" type="ColorRect" parent="UI"]
 visible = false
@@ -98,21 +102,21 @@ offset_bottom = 36.0
 theme_override_constants/separation = 28
 alignment = 1
 
-[node name="RestartBtn" type="Button" parent="UI/PauseMenu/Row"]
+[node name="RestartBtn" type="TextureButton" parent="UI/PauseMenu/Row"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "重"
+texture_normal = ExtResource("3")
+ignore_texture_size = true
+stretch_mode = 5
 tooltip_text = "重新开始"
-flat = true
 
-[node name="SongsBtn" type="Button" parent="UI/PauseMenu/Row"]
+[node name="SongsBtn" type="TextureButton" parent="UI/PauseMenu/Row"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "曲"
+texture_normal = ExtResource("4")
+ignore_texture_size = true
+stretch_mode = 5
 tooltip_text = "返回选歌"
-flat = true
 
 [node name="Overlay" type="ColorRect" parent="UI"]
 anchors_preset = 15

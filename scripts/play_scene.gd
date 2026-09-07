@@ -131,7 +131,7 @@ func _on_start() -> void:
 	_status = Status.PLAYING
 	_overlay.visible = false
 	_pause_menu.visible = false
-	_pause_btn.text = "⏸"
+	_pause_btn.text = "停"
 	_feedback = "开始！"
 	_update_hud()
 
@@ -156,7 +156,7 @@ func _enter_pause() -> void:
 	_clock.pause()
 	if _video.stream:
 		_video.paused = true
-	_pause_btn.text = "▶"
+	_pause_btn.text = "续"
 	_pause_menu.visible = true
 	_feedback = ""
 	_update_hud()

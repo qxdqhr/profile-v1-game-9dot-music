@@ -74,7 +74,7 @@ offset_bottom = 52.0
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "⏸"
+text = "停"
 flat = true
 
 [node name="PauseMenu" type="ColorRect" parent="UI"]
@@ -102,7 +102,7 @@ alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "↻"
+text = "重"
 tooltip_text = "重新开始"
 flat = true
 
@@ -110,7 +110,7 @@ flat = true
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "☰"
+text = "曲"
 tooltip_text = "返回选歌"
 flat = true
 

@@ -1,5 +1,5 @@
 extends Control
-## M1 play: Tap/Slide on nine-grid with audio-master (generated metronome).
+## Play: Tap/Slide + audio-master clock + video follow (M2).
 
 enum Status { READY, PLAYING, PAUSED, ENDED }
 
@@ -18,8 +18,8 @@ var _band := 0.0
 var _node_r := 0.0
 var _feedback := ""
 var _clock: NineDotClock
-var _fingers: Dictionary = {} # id -> gesture dict
-var _player_offset := 0
+var _fingers: Dictionary = {}
+var _diff_key := "normal"
 
 @onready var _hud: Label = $UI/HUD
 @onready var _feedback_label: Label = $UI/Feedback
@@ -30,12 +30,14 @@ var _player_offset := 0
 @onready var _retry_btn: Button = $UI/Overlay/VBox/RetryBtn
 @onready var _back_btn: Button = $UI/Overlay/VBox/BackBtn
 @onready var _audio: AudioStreamPlayer = $AudioStreamPlayer
+@onready var _video: VideoStreamPlayer = $Video
 @onready var _grid_layer: Control = $GridLayer
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(NineDotConfig.VIEW_W, NineDotConfig.VIEW_H)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_player_offset = AppSettings.offset_ms
+	if String(PlaySession.diff) != "":
+		_diff_key = PlaySession.diff
 	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
 	_clock = NineDotClock.new()
 	add_child(_clock)
@@ -49,6 +51,15 @@ func _ready() -> void:
 	_reset_to_ready()
 	get_viewport().size_changed.connect(_rebuild_geometry)
 
+func _notes_path() -> String:
+	var diffs: Dictionary = _meta.get("difficulties", {})
+	var entry = diffs.get(_diff_key, null)
+	if typeof(entry) == TYPE_DICTIONARY and entry != null:
+		var file := String(entry.get("file", ""))
+		if file != "":
+			return "res://charts/song-metronome-001/%s" % file
+	return NOTES_PATH
+
 func _rebuild_geometry() -> void:
 	_grid_size = minf(NineDotConfig.GRID_SIZE, size.x - NineDotConfig.GRID_MARGIN * 2.0)
 	_origin = Vector2((size.x - _grid_size) * 0.5, NineDotConfig.GRID_TOP)
@@ -60,32 +71,50 @@ func _rebuild_geometry() -> void:
 
 func _reset_to_ready() -> void:
 	_meta = NineDotChart.load_meta(META_PATH)
-	_notes = NineDotChart.load_notes(NOTES_PATH)
+	_notes = NineDotChart.load_notes(_notes_path())
 	_score = NineDotJudge.initial_score()
 	_status = Status.READY
 	_fingers.clear()
-	_feedback = "点击开始 · Normal"
+	_feedback = "点击开始 · %s" % _diff_key.capitalize()
 	_overlay.visible = true
-	_over_msg.text = "%s\n%s\nNormal" % [NineDotConfig.DISPLAY_NAME, String(_meta.get("title", ""))]
+	_over_msg.text = "%s\n%s\n%s" % [NineDotConfig.DISPLAY_NAME, String(_meta.get("title", "")), _diff_key.capitalize()]
 	_start_btn.visible = true
 	_retry_btn.visible = false
 	_back_btn.visible = true
 	_pause_btn.text = "暂停"
 	_clock.stop()
+	NineDotMedia.stop_av(_audio, _video)
+	_prepare_streams(false)
 	_update_hud()
 	_grid_layer.queue_redraw()
 
+func _prepare_streams(autoplay: bool) -> void:
+	var audio_path := String((_meta.get("audio", {}) as Dictionary).get("path", ""))
+	var video_path := String((_meta.get("video", {}) as Dictionary).get("path", ""))
+	var audio_stream := NineDotMedia.load_audio(audio_path)
+	if audio_stream == null:
+		var duration := int(_meta.get("durationMs", 16000))
+		audio_stream = NineDotMetronome.build_stream(duration, float(_meta.get("bpm", 120)))
+	_audio.stream = audio_stream
+	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
+	var video_stream := NineDotMedia.load_video(video_path)
+	_video.stream = video_stream
+	_video.volume_db = -80.0
+	if autoplay:
+		NineDotMedia.start_av(_audio, _video)
+
 func _on_start() -> void:
-	_notes = NineDotChart.load_notes(NOTES_PATH)
+	_notes = NineDotChart.load_notes(_notes_path())
 	_score = NineDotJudge.initial_score()
 	_fingers.clear()
 	var duration := int(_meta.get("durationMs", 16000))
-	var bpm := float(_meta.get("bpm", 120))
-	var stream := NineDotMetronome.build_stream(duration, bpm)
-	_audio.stream = stream
-	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
+	_prepare_streams(false)
 	_clock.setup(_audio, int(_meta.get("offsetMs", 0)), AppSettings.offset_ms, duration + 500)
+	# Clock start plays audio; also start video at 0 glued to audio.
 	_clock.start()
+	if _video.stream:
+		_video.play()
+		_video.stream_position = 0.0
 	_status = Status.PLAYING
 	_overlay.visible = false
 	_feedback = "开始！"
@@ -95,34 +124,41 @@ func _on_retry() -> void:
 	_reset_to_ready()
 
 func _on_back() -> void:
-	get_tree().change_scene_to_file("res://scenes/title.tscn")
+	get_tree().change_scene_to_file("res://scenes/song_select.tscn")
 
 func _toggle_pause() -> void:
 	if _status == Status.PLAYING:
 		_status = Status.PAUSED
 		_clock.pause()
+		if _video.stream:
+			_video.paused = true
 		_pause_btn.text = "继续"
 		_feedback = "已暂停"
 	elif _status == Status.PAUSED:
 		_status = Status.PLAYING
 		_clock.resume()
+		if _video.stream:
+			_video.paused = false
 		_pause_btn.text = "暂停"
 		_feedback = "继续"
 	_update_hud()
 
 func _process(_delta: float) -> void:
-	if _status != Status.PLAYING:
-		return
-	var now := _clock.now_ms()
-	_sweep_misses(now)
-	if _all_judged() or _clock.poll_ended():
-		_end_play()
-	_update_hud()
-	_grid_layer.queue_redraw()
+	if _status == Status.PLAYING:
+		NineDotMedia.sync_video_to_audio(_audio, _video)
+		var now := _clock.now_ms()
+		_sweep_misses(now)
+		if _all_judged() or _clock.poll_ended():
+			_end_play()
+		_update_hud()
+		_grid_layer.queue_redraw()
+	elif _status == Status.PAUSED:
+		_grid_layer.queue_redraw()
 
 func _end_play() -> void:
 	_status = Status.ENDED
 	_clock.stop()
+	NineDotMedia.stop_av(_audio, _video)
 	_overlay.visible = true
 	var acc := NineDotJudge.accuracy_pct(_score)
 	_over_msg.text = "结算\nAccuracy %.1f%%\nMax Combo %d\nP %d  G %d  Good %d  Miss %d" % [
@@ -181,7 +217,6 @@ func _on_grid_gui_input(event: InputEvent) -> void:
 
 func _finger_down(id: int, pos: Vector2) -> void:
 	var now := _clock.now_ms()
-	# Prefer slide if touch near an active slide start; else tap.
 	var slide_idx := _find_slide_candidate(now, pos)
 	if slide_idx >= 0:
 		var note: Dictionary = _notes[slide_idx]
@@ -219,7 +254,6 @@ func _finger_move(id: int, pos: Vector2) -> void:
 	var b: Vector2 = g["end"]
 	var dist := NineDotGeometry.dist_to_segment(pos, a, b)
 	if dist > _band * 2.0:
-		# Left the band hard — miss on release; mark progress frozen.
 		g["off_band"] = true
 		_fingers[id] = g
 		return
@@ -302,7 +336,6 @@ func _find_slide_candidate(now: int, pos: Vector2) -> int:
 		var d := absi(now - int(n["tMs"]))
 		if d > NineDotConfig.JUDGE_GOOD_MS:
 			continue
-		# Also allow starting a bit early during approach window
 		if now < int(n["tMs"]) - NineDotConfig.JUDGE_GOOD_MS:
 			continue
 		var ends := _slide_ends(n)
@@ -321,13 +354,10 @@ func _draw_grid() -> void:
 	var now := 0
 	if _status == Status.PLAYING or _status == Status.PAUSED:
 		now = _clock.now_ms()
-	# Edges
 	for e in NineDotGeometry.legal_edges():
 		var a: int = e[0]
 		var b: int = e[1]
-		var col := Color(0.25, 0.32, 0.4, 0.55)
-		_grid_layer.draw_line(_centers[a - 1], _centers[b - 1], col, 2.0, true)
-	# Active notes highlight
+		_grid_layer.draw_line(_centers[a - 1], _centers[b - 1], Color(0.25, 0.32, 0.4, 0.45), 2.0, true)
 	for n in _notes:
 		if bool(n["judged"]):
 			continue
@@ -338,20 +368,18 @@ func _draw_grid() -> void:
 		var alpha := 1.0 - clampf(float(absi(until)) / float(NineDotConfig.APPROACH_MS), 0.0, 0.85)
 		if String(n["type"]) == "tap":
 			var c := _centers[int(n["node"]) - 1]
-			_grid_layer.draw_circle(c, _node_r * 1.05, Color(0.35, 0.85, 1.0, 0.25 + 0.5 * alpha))
+			_grid_layer.draw_circle(c, _node_r * 1.05, Color(0.35, 0.85, 1.0, 0.2 + 0.45 * alpha))
 			_grid_layer.draw_arc(c, _node_r, 0, TAU, 48, Color(0.5, 0.95, 1.0, alpha), 3.0, true)
 		else:
 			var ends := _slide_ends(n)
-			_grid_layer.draw_line(ends[0], ends[1], Color(1.0, 0.75, 0.25, 0.35 + 0.55 * alpha), 8.0, true)
+			_grid_layer.draw_line(ends[0], ends[1], Color(1.0, 0.75, 0.25, 0.3 + 0.5 * alpha), 8.0, true)
 			_grid_layer.draw_circle(ends[0], 8.0, Color(1.0, 0.85, 0.3, alpha))
-			# Direction tip
 			var tip := ends[0].lerp(ends[1], 0.65)
 			_grid_layer.draw_circle(tip, 5.0, Color(1.0, 0.9, 0.5, alpha))
-	# Nodes
 	for i in range(_centers.size()):
 		var c: Vector2 = _centers[i]
-		_grid_layer.draw_circle(c, _node_r * 0.92, Color(0.12, 0.16, 0.22, 0.92))
-		_grid_layer.draw_arc(c, _node_r * 0.92, 0, TAU, 40, Color(0.55, 0.7, 0.85, 0.9), 2.0, true)
+		_grid_layer.draw_circle(c, _node_r * 0.92, Color(0.12, 0.16, 0.22, 0.75))
+		_grid_layer.draw_arc(c, _node_r * 0.92, 0, TAU, 40, Color(0.55, 0.7, 0.85, 0.85), 2.0, true)
 
 func _update_hud() -> void:
 	var now := 0

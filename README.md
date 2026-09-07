@@ -16,5 +16,6 @@ bash scripts/export-godot-game.sh 9dot-music
 ## 当前进度
 
 - **M0** PRD 收敛
-- **M1** 标题 / 选歌 / 设置 / 关于 + Tap/Slide 判定 + Metronome Lab（生成节拍轨作音频主时钟）
-- **M2+** 内置视频跟随、正式曲、补难度
+- **M1** 标题 / 选歌 / 设置 / 关于 + Tap/Slide + Metronome Lab
+- **M2** 内置 `audio.ogg` + `video.ogv`；音频主时钟；视频跟随纠偏（防乱轴）
+- **M3+** UI 打磨、补难度、Agent 生谱、百万计分

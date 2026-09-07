@@ -48,17 +48,17 @@ func _build_diffs() -> void:
 		c.queue_free()
 	var diffs: Dictionary = _selected.get("difficulties", {})
 	for key in ["easy", "normal", "hard", "extreme"]:
+		var diff_key: String = String(key)
 		var btn := Button.new()
-		btn.text = key.capitalize()
+		btn.text = diff_key.capitalize()
 		btn.custom_minimum_size = Vector2(280, 40)
-		var entry = diffs.get(key, null)
+		var entry = diffs.get(diff_key, null)
 		var available := typeof(entry) == TYPE_DICTIONARY and entry != null and String(entry.get("file", "")) != ""
 		btn.disabled = not available
 		if not available:
-			btn.text = "%s（未实装）" % key.capitalize()
+			btn.text = "%s（未实装）" % diff_key.capitalize()
 		else:
-			var k := key
-			btn.pressed.connect(func(): _start_diff(k))
+			btn.pressed.connect(func(): _start_diff(diff_key))
 		_diff_box.add_child(btn)
 
 func _start_diff(diff: String) -> void:

@@ -1,9 +1,9 @@
 extends Control
 
-@onready var _vol: HSlider = $Center/VBox/VolSlider
-@onready var _off: SpinBox = $Center/VBox/OffsetSpin
-@onready var _vol_label: Label = $Center/VBox/VolLabel
-@onready var _off_label: Label = $Center/VBox/OffsetLabel
+@onready var _vol: HSlider = $Center/Panel/Margin/VBox/VolSlider
+@onready var _off: SpinBox = $Center/Panel/Margin/VBox/OffsetSpin
+@onready var _vol_label: Label = $Center/Panel/Margin/VBox/VolLabel
+@onready var _off_label: Label = $Center/Panel/Margin/VBox/OffsetLabel
 
 func _ready() -> void:
 	_vol.min_value = 0.0
@@ -16,8 +16,8 @@ func _ready() -> void:
 	_off.value = AppSettings.offset_ms
 	_vol.value_changed.connect(_on_vol)
 	_off.value_changed.connect(_on_off)
-	$Center/VBox/ResetBtn.pressed.connect(_on_reset)
-	$Center/VBox/BackBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
+	$Center/Panel/Margin/VBox/ResetBtn.pressed.connect(_on_reset)
+	$Center/Panel/Margin/VBox/BackBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
 	_refresh_labels()
 
 func _on_vol(v: float) -> void:
@@ -36,5 +36,5 @@ func _on_reset() -> void:
 	_refresh_labels()
 
 func _refresh_labels() -> void:
-	_vol_label.text = "主音量 %.0f%%" % (AppSettings.volume_linear * 100.0)
-	_off_label.text = "判定偏移 %d ms" % AppSettings.offset_ms
+	_vol_label.text = "主音量  %.0f%%" % (AppSettings.volume_linear * 100.0)
+	_off_label.text = "判定偏移  %d ms（正值更晚判定）" % AppSettings.offset_ms

@@ -17,5 +17,6 @@ bash scripts/export-godot-game.sh 9dot-music
 
 - **M0** PRD 收敛
 - **M1** 标题 / 选歌 / 设置 / 关于 + Tap/Slide + Metronome Lab
-- **M2** 内置 `audio.ogg` + `video.ogv`；音频主时钟；视频跟随纠偏（防乱轴）
-- **M3+** UI 打磨、补难度、Agent 生谱、百万计分
+- **M2** 内置 `audio.ogg` + `video.ogv`；音频主时钟；视频跟随纠偏
+- **M3** 主界面品牌首屏 / 曲目目录 / 难度灰显 / 设置面板 / 独立结算页
+- **M4+** 补难度、百万计分、Agent 生谱

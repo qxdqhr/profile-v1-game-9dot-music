@@ -3,8 +3,8 @@ extends Control
 
 enum Status { READY, PLAYING, PAUSED, ENDED }
 
-const META_PATH := "res://charts/song-metronome-001/meta.json"
-const NOTES_PATH := "res://charts/song-metronome-001/normal.json"
+const FALLBACK_META := "res://charts/song-metronome-001/meta.json"
+const FALLBACK_NOTES := "res://charts/song-metronome-001/normal.json"
 
 var _status: Status = Status.READY
 var _notes: Array = []
@@ -20,6 +20,7 @@ var _feedback := ""
 var _clock: NineDotClock
 var _fingers: Dictionary = {}
 var _diff_key := "normal"
+var _meta_path := FALLBACK_META
 
 @onready var _hud: Label = $UI/HUD
 @onready var _feedback_label: Label = $UI/Feedback
@@ -36,8 +37,8 @@ var _diff_key := "normal"
 func _ready() -> void:
 	custom_minimum_size = Vector2(NineDotConfig.VIEW_W, NineDotConfig.VIEW_H)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	if String(PlaySession.diff) != "":
-		_diff_key = PlaySession.diff
+	_diff_key = PlaySession.diff if String(PlaySession.diff) != "" else "normal"
+	_meta_path = PlaySession.meta_path if String(PlaySession.meta_path) != "" else FALLBACK_META
 	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
 	_clock = NineDotClock.new()
 	add_child(_clock)
@@ -52,13 +53,15 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_rebuild_geometry)
 
 func _notes_path() -> String:
-	var diffs: Dictionary = _meta.get("difficulties", {})
-	var entry = diffs.get(_diff_key, null)
-	if typeof(entry) == TYPE_DICTIONARY and entry != null:
-		var file := String(entry.get("file", ""))
-		if file != "":
-			return "res://charts/song-metronome-001/%s" % file
-	return NOTES_PATH
+	var path := NineDotCatalog.notes_path_for(_meta, _diff_key)
+	if path != "":
+		return path
+	# Enrich meta with _dir for catalog helper
+	var enriched := _meta.duplicate()
+	if not enriched.has("_dir"):
+		enriched["_dir"] = String(_meta.get("id", "song-metronome-001"))
+	path = NineDotCatalog.notes_path_for(enriched, _diff_key)
+	return path if path != "" else FALLBACK_NOTES
 
 func _rebuild_geometry() -> void:
 	_grid_size = minf(NineDotConfig.GRID_SIZE, size.x - NineDotConfig.GRID_MARGIN * 2.0)
@@ -70,14 +73,16 @@ func _rebuild_geometry() -> void:
 	_grid_layer.queue_redraw()
 
 func _reset_to_ready() -> void:
-	_meta = NineDotChart.load_meta(META_PATH)
+	_meta = NineDotChart.load_meta(_meta_path)
+	if not _meta.has("_dir"):
+		_meta["_dir"] = String(_meta.get("id", "song-metronome-001"))
 	_notes = NineDotChart.load_notes(_notes_path())
 	_score = NineDotJudge.initial_score()
 	_status = Status.READY
 	_fingers.clear()
 	_feedback = "点击开始 · %s" % _diff_key.capitalize()
 	_overlay.visible = true
-	_over_msg.text = "%s\n%s\n%s" % [NineDotConfig.DISPLAY_NAME, String(_meta.get("title", "")), _diff_key.capitalize()]
+	_over_msg.text = "%s\n%s\n%s\n点开始" % [NineDotConfig.DISPLAY_NAME, String(_meta.get("title", "")), _diff_key.capitalize()]
 	_start_btn.visible = true
 	_retry_btn.visible = false
 	_back_btn.visible = true
@@ -159,15 +164,8 @@ func _end_play() -> void:
 	_status = Status.ENDED
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
-	_overlay.visible = true
-	var acc := NineDotJudge.accuracy_pct(_score)
-	_over_msg.text = "结算\nAccuracy %.1f%%\nMax Combo %d\nP %d  G %d  Good %d  Miss %d" % [
-		acc, int(_score["max_combo"]), int(_score["perfect"]), int(_score["great"]), int(_score["good"]), int(_score["miss"])
-	]
-	_start_btn.visible = false
-	_retry_btn.visible = true
-	_back_btn.visible = true
-	_update_hud()
+	PlaySession.store_result(String(_meta.get("title", "")), _score)
+	get_tree().change_scene_to_file("res://scenes/result.tscn")
 
 func _all_judged() -> bool:
 	for n in _notes:

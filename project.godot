@@ -1,13 +1,13 @@
-; 9dot Music — Godot scaffold. Portrait music pad MVP.
+; 9-Dot Game — Godot. Portrait nine-grid rhythm (Tap / Slide).
 
 config_version=5
 
 [application]
 
-config/name="9dot Music"
-config/description="Nine-dot music pad scaffold. Entry /games/9dot-music/."
-config/version="0.1.0"
-run/main_scene="res://scenes/main.tscn"
+config/name="9-Dot Game"
+config/description="Nine-dot Tap/Slide rhythm. Entry /games/9dot-music/."
+config/version="0.2.0"
+run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
@@ -30,6 +30,7 @@ textures/vram_compression/import_etc2_astc=true
 [autoload]
 
 Sa2kitCjk="*res://addons/sa2kit_godot/autoload/cjk_boot.gd"
+AppSettings="*res://scripts/app_settings.gd"
 
 [gui]
 
@@ -38,3 +39,7 @@ theme/custom_font="res://addons/sa2kit_godot/fonts/SourceHanSansCN-Regular.otf"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/sa2kit_godot/plugin.cfg")
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true

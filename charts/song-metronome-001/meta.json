@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "song-metronome-001",
+  "title": "Metronome Lab",
+  "artist": "9-Dot",
+  "bpm": 120,
+  "offsetMs": 0,
+  "durationMs": 16000,
+  "audio": {
+    "path": "generated://metronome"
+  },
+  "video": {
+    "source": "none",
+    "path": "",
+    "cacheKey": "song-metronome-001"
+  },
+  "difficulties": {
+    "easy": null,
+    "normal": { "file": "normal.json" },
+    "hard": null,
+    "extreme": null
+  }
+}

@@ -2,3 +2,5 @@
 export/
 *.translation
 .DS_Store
+
+charts/_raw_*/

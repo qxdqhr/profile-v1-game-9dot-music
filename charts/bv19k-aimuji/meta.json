@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "bv19k-aimuji",
+  "title": "愛夢跡",
+  "artist": "伪爱言叶VI / Miku",
+  "bpm": 93.8,
+  "offsetMs": 0,
+  "durationMs": 221290,
+  "sourceUrl": "https://www.bilibili.com/festival/MikuBonly19thBirthday?bvid=BV19k4R6jE6o",
+  "bvid": "BV19k4R6jE6o",
+  "audio": {
+    "path": "res://charts/bv19k-aimuji/audio.ogg"
+  },
+  "video": {
+    "source": "builtin",
+    "path": "res://charts/bv19k-aimuji/video.ogv",
+    "cacheKey": "BV19k4R6jE6o"
+  },
+  "difficulties": {
+    "easy": {
+      "file": "easy.json"
+    },
+    "normal": {
+      "file": "normal.json"
+    },
+    "hard": {
+      "file": "hard.json"
+    },
+    "extreme": {
+      "file": "extreme.json"
+    }
+  }
+}

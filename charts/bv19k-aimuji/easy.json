@@ -1,0 +1,428 @@
+{
+  "difficulty": "easy",
+  "notes": [
+    {
+      "tMs": 4888,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 10755,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 21181,
+      "type": "tap",
+      "node": 3
+    },
+    {
+      "tMs": 23157,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 25761,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 27168,
+      "type": "slide",
+      "edge": [
+        2,
+        5
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 29243,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 30979,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 32715,
+      "type": "tap",
+      "node": 9
+    },
+    {
+      "tMs": 35868,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 37594,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 39340,
+      "type": "slide",
+      "edge": [
+        4,
+        8
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 40318,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 42842,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 44878,
+      "type": "tap",
+      "node": 6
+    },
+    {
+      "tMs": 47711,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 48998,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 50744,
+      "type": "slide",
+      "edge": [
+        6,
+        9
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 53239,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 54436,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 57060,
+      "type": "tap",
+      "node": 3
+    },
+    {
+      "tMs": 60123,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 62917,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 66399,
+      "type": "slide",
+      "edge": [
+        2,
+        3
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 70669,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 74460,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 78810,
+      "type": "tap",
+      "node": 9
+    },
+    {
+      "tMs": 81075,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 86633,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 92489,
+      "type": "slide",
+      "edge": [
+        4,
+        5
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 93766,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 95313,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 96720,
+      "type": "tap",
+      "node": 6
+    },
+    {
+      "tMs": 98805,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 102267,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 105340,
+      "type": "slide",
+      "edge": [
+        5,
+        9
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 107485,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 108273,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 110089,
+      "type": "tap",
+      "node": 3
+    },
+    {
+      "tMs": 111626,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 113352,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 115866,
+      "type": "slide",
+      "edge": [
+        1,
+        4
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 117592,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 120097,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 125534,
+      "type": "tap",
+      "node": 9
+    },
+    {
+      "tMs": 131850,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 135980,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 139403,
+      "type": "slide",
+      "edge": [
+        3,
+        5
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 143364,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 144671,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 145758,
+      "type": "tap",
+      "node": 6
+    },
+    {
+      "tMs": 146846,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 147484,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 148153,
+      "type": "slide",
+      "edge": [
+        5,
+        7
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 150966,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 153590,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 158589,
+      "type": "tap",
+      "node": 3
+    },
+    {
+      "tMs": 167479,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 169025,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 172517,
+      "type": "slide",
+      "edge": [
+        8,
+        9
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 175331,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 178813,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 180190,
+      "type": "tap",
+      "node": 9
+    },
+    {
+      "tMs": 183702,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 186416,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 191015,
+      "type": "slide",
+      "edge": [
+        2,
+        5
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 196224,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 200344,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 203158,
+      "type": "tap",
+      "node": 6
+    },
+    {
+      "tMs": 204106,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 205971,
+      "type": "tap",
+      "node": 8
+    },
+    {
+      "tMs": 210092,
+      "type": "slide",
+      "edge": [
+        4,
+        8
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 213993,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 215949,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 217256,
+      "type": "tap",
+      "node": 3
+    }
+  ]
+}

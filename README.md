@@ -20,3 +20,4 @@ bash scripts/export-godot-game.sh 9dot-music
 - **M2** 内置 `audio.ogg` + `video.ogv`；音频主时钟；视频跟随纠偏
 - **M3** 主界面品牌首屏 / 曲目目录 / 难度灰显 / 设置面板 / 独立结算页
 - **M4** Easy–Extreme 四难度、百万计分、Agent 生谱（B 站链接 → 本地启发式谱 + 缓存）
+- **曲目**：`Metronome Lab`（占位）· `愛夢跡`（BV19k4R6jE6o 本地下载+onset 铺面）

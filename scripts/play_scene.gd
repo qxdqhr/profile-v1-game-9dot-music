@@ -77,7 +77,7 @@ func _reset_to_ready() -> void:
 	if not _meta.has("_dir"):
 		_meta["_dir"] = String(_meta.get("id", "song-metronome-001"))
 	_notes = NineDotChart.load_notes(_notes_path())
-	_score = NineDotJudge.initial_score()
+	_score = NineDotJudge.initial_score(_notes.size())
 	_status = Status.READY
 	_fingers.clear()
 	_feedback = "点击开始 · %s" % _diff_key.capitalize()
@@ -110,7 +110,7 @@ func _prepare_streams(autoplay: bool) -> void:
 
 func _on_start() -> void:
 	_notes = NineDotChart.load_notes(_notes_path())
-	_score = NineDotJudge.initial_score()
+	_score = NineDotJudge.initial_score(_notes.size())
 	_fingers.clear()
 	var duration := int(_meta.get("durationMs", 16000))
 	_prepare_streams(false)
@@ -383,8 +383,9 @@ func _update_hud() -> void:
 	var now := 0
 	if _status == Status.PLAYING or _status == Status.PAUSED:
 		now = _clock.now_ms()
-	_hud.text = "%s\nCombo %d  Acc %.1f%%\n%d ms" % [
+	_hud.text = "%s\nScore %d\nCombo %d  Acc %.1f%%\n%d ms" % [
 		NineDotConfig.DISPLAY_NAME,
+		int(_score.get("score", 0)),
 		int(_score["combo"]),
 		NineDotJudge.accuracy_pct(_score),
 		now,

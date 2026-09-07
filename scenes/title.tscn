@@ -56,9 +56,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -120.0
-offset_top = -220.0
+offset_top = -260.0
 offset_right = 120.0
-offset_bottom = -36.0
+offset_bottom = -28.0
 theme_override_constants/separation = 12
 
 [node name="EnterBtn" type="Button" parent="Menu"]
@@ -66,6 +66,11 @@ custom_minimum_size = Vector2(240, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "进入游戏"
+
+[node name="AgentBtn" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(240, 42)
+layout_mode = 2
+text = "Agent 生谱"
 
 [node name="SettingsBtn" type="Button" parent="Menu"]
 custom_minimum_size = Vector2(240, 42)

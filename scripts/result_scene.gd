@@ -6,10 +6,11 @@ extends Control
 func _ready() -> void:
 	var s: Dictionary = PlaySession.last_score
 	var acc := NineDotJudge.accuracy_pct(s) if not s.is_empty() else 0.0
-	_body.text = "%s\n%s · %s\n\nAccuracy  %.1f%%\nMax Combo  %d\n\nPerfect  %d\nGreat  %d\nGood  %d\nMiss  %d" % [
+	_body.text = "%s\n%s · %s\n\nScore  %d\nAccuracy  %.1f%%\nMax Combo  %d\n\nPerfect  %d\nGreat  %d\nGood  %d\nMiss  %d" % [
 		NineDotConfig.DISPLAY_NAME,
 		PlaySession.last_title,
 		PlaySession.diff.capitalize(),
+		int(s.get("score", 0)),
 		acc,
 		int(s.get("max_combo", 0)),
 		int(s.get("perfect", 0)),

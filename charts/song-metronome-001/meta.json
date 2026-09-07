@@ -15,9 +15,17 @@
     "cacheKey": "song-metronome-001"
   },
   "difficulties": {
-    "easy": null,
-    "normal": { "file": "normal.json" },
-    "hard": null,
-    "extreme": null
+    "easy": {
+      "file": "easy.json"
+    },
+    "normal": {
+      "file": "normal.json"
+    },
+    "hard": {
+      "file": "hard.json"
+    },
+    "extreme": {
+      "file": "extreme.json"
+    }
   }
 }

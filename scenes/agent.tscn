@@ -1,0 +1,86 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/agent_scene.gd" id="1"]
+
+[node name="Agent" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.08, 0.11, 1)
+mouse_filter = 2
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(320, 420)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Head" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Agent 生谱"
+horizontal_alignment = 1
+
+[node name="UrlLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "B 站视频链接"
+
+[node name="Url" type="LineEdit" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="BpmLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "BPM（启发式）"
+
+[node name="Bpm" type="SpinBox" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DurLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "时长（秒）"
+
+[node name="Dur" type="SpinBox" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="GenBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "生成谱面"
+
+[node name="PlayBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "开始游玩"
+
+[node name="Hint" type="Label" parent="Center/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(280, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="BackBtn" type="Button" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "返回"

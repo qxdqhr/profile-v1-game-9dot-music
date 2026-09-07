@@ -1,0 +1,92 @@
+{
+  "difficulty": "easy",
+  "notes": [
+    {
+      "tMs": 2000,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 2928,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 3856,
+      "type": "tap",
+      "node": 3
+    },
+    {
+      "tMs": 4784,
+      "type": "slide",
+      "edge": [
+        2,
+        5
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 5712,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 6640,
+      "type": "tap",
+      "node": 6
+    },
+    {
+      "tMs": 7568,
+      "type": "tap",
+      "node": 7
+    },
+    {
+      "tMs": 8496,
+      "type": "slide",
+      "edge": [
+        4,
+        7
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 9424,
+      "type": "tap",
+      "node": 9
+    },
+    {
+      "tMs": 10352,
+      "type": "tap",
+      "node": 1
+    },
+    {
+      "tMs": 11280,
+      "type": "tap",
+      "node": 2
+    },
+    {
+      "tMs": 12208,
+      "type": "slide",
+      "edge": [
+        8,
+        9
+      ],
+      "dir": "b_to_a"
+    },
+    {
+      "tMs": 13136,
+      "type": "tap",
+      "node": 4
+    },
+    {
+      "tMs": 14064,
+      "type": "tap",
+      "node": 5
+    },
+    {
+      "tMs": 14992,
+      "type": "tap",
+      "node": 6
+    }
+  ]
+}

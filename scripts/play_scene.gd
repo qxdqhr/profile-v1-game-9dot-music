@@ -93,7 +93,7 @@ func _reset_to_ready() -> void:
 	_start_btn.visible = true
 	_retry_btn.visible = false
 	_back_btn.visible = true
-	_pause_btn.text = "⏸"
+	_pause_btn.text = "停"
 	_pause_menu.visible = false
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
@@ -166,7 +166,7 @@ func _leave_pause() -> void:
 	_clock.resume()
 	if _video.stream:
 		_video.paused = false
-	_pause_btn.text = "⏸"
+	_pause_btn.text = "停"
 	_pause_menu.visible = false
 	_feedback = "继续"
 	_update_hud()

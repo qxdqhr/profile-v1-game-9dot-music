@@ -25,6 +25,9 @@ var _meta_path := FALLBACK_META
 @onready var _hud: Label = $UI/HUD
 @onready var _feedback_label: Label = $UI/Feedback
 @onready var _pause_btn: Button = $UI/Controls/PauseBtn
+@onready var _pause_menu: ColorRect = $UI/PauseMenu
+@onready var _restart_btn: Button = $UI/PauseMenu/Row/RestartBtn
+@onready var _songs_btn: Button = $UI/PauseMenu/Row/SongsBtn
 @onready var _overlay: ColorRect = $UI/Overlay
 @onready var _over_msg: Label = $UI/Overlay/VBox/Msg
 @onready var _start_btn: Button = $UI/Overlay/VBox/StartBtn
@@ -43,9 +46,13 @@ func _ready() -> void:
 	_clock = NineDotClock.new()
 	add_child(_clock)
 	_pause_btn.pressed.connect(_toggle_pause)
+	_restart_btn.pressed.connect(_on_pause_restart)
+	_songs_btn.pressed.connect(_on_back)
 	_start_btn.pressed.connect(_on_start)
 	_retry_btn.pressed.connect(_on_retry)
 	_back_btn.pressed.connect(_on_back)
+	_pause_menu.visible = false
+	_pause_menu.gui_input.connect(_on_pause_menu_gui_input)
 	_grid_layer.draw.connect(_draw_grid)
 	_grid_layer.gui_input.connect(_on_grid_gui_input)
 	_rebuild_geometry()
@@ -86,7 +93,8 @@ func _reset_to_ready() -> void:
 	_start_btn.visible = true
 	_retry_btn.visible = false
 	_back_btn.visible = true
-	_pause_btn.text = "暂停"
+	_pause_btn.text = "⏸"
+	_pause_menu.visible = false
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
 	_prepare_streams(false)
@@ -122,31 +130,69 @@ func _on_start() -> void:
 		_video.stream_position = 0.0
 	_status = Status.PLAYING
 	_overlay.visible = false
+	_pause_menu.visible = false
+	_pause_btn.text = "⏸"
 	_feedback = "开始！"
 	_update_hud()
 
 func _on_retry() -> void:
 	_reset_to_ready()
 
+func _on_pause_restart() -> void:
+	_pause_menu.visible = false
+	_on_start()
+
 func _on_back() -> void:
 	get_tree().change_scene_to_file("res://scenes/song_select.tscn")
 
 func _toggle_pause() -> void:
 	if _status == Status.PLAYING:
-		_status = Status.PAUSED
-		_clock.pause()
-		if _video.stream:
-			_video.paused = true
-		_pause_btn.text = "继续"
-		_feedback = "已暂停"
+		_enter_pause()
 	elif _status == Status.PAUSED:
-		_status = Status.PLAYING
-		_clock.resume()
-		if _video.stream:
-			_video.paused = false
-		_pause_btn.text = "暂停"
-		_feedback = "继续"
+		_leave_pause()
+
+func _enter_pause() -> void:
+	_status = Status.PAUSED
+	_clock.pause()
+	if _video.stream:
+		_video.paused = true
+	_pause_btn.text = "▶"
+	_pause_menu.visible = true
+	_feedback = ""
 	_update_hud()
+
+func _leave_pause() -> void:
+	_status = Status.PLAYING
+	_clock.resume()
+	if _video.stream:
+		_video.paused = false
+	_pause_btn.text = "⏸"
+	_pause_menu.visible = false
+	_feedback = "继续"
+	_update_hud()
+
+func _on_pause_menu_gui_input(event: InputEvent) -> void:
+	# Tap dimmed area (not the icon buttons) to resume.
+	if not _pause_menu.visible or _status != Status.PAUSED:
+		return
+	var tapped := false
+	var local_pos := Vector2.ZERO
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			tapped = true
+			local_pos = mb.position
+	elif event is InputEventScreenTouch:
+		var st := event as InputEventScreenTouch
+		if st.pressed:
+			tapped = true
+			local_pos = st.position
+	if not tapped:
+		return
+	var row: Control = _pause_menu.get_node("Row")
+	var global_pos := _pause_menu.get_global_transform() * local_pos
+	if not row.get_global_rect().has_point(global_pos):
+		_leave_pause()
 
 func _process(_delta: float) -> void:
 	if _status == Status.PLAYING:

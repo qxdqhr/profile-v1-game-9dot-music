@@ -4,3 +4,7 @@ export/
 .DS_Store
 
 charts/_raw_*/
+
+# Godot official Android Gradle build template (~200MB; reinstall via script)
+android/build/
+android/.build_version

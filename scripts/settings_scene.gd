@@ -4,6 +4,8 @@ extends Control
 @onready var _off: SpinBox = $Center/Panel/Margin/VBox/OffsetSpin
 @onready var _vol_label: Label = $Center/Panel/Margin/VBox/VolLabel
 @onready var _off_label: Label = $Center/Panel/Margin/VBox/OffsetLabel
+@onready var _vibrate: CheckButton = $Center/Panel/Margin/VBox/VibrateCheck
+@onready var _hit_sfx: CheckButton = $Center/Panel/Margin/VBox/HitSfxCheck
 
 func _ready() -> void:
 	_vol.min_value = 0.0
@@ -14,8 +16,12 @@ func _ready() -> void:
 	_off.max_value = 200
 	_off.step = 1
 	_off.value = AppSettings.offset_ms
+	_vibrate.button_pressed = AppSettings.vibration_enabled
+	_hit_sfx.button_pressed = AppSettings.hit_sfx_enabled
 	_vol.value_changed.connect(_on_vol)
 	_off.value_changed.connect(_on_off)
+	_vibrate.toggled.connect(_on_vibrate)
+	_hit_sfx.toggled.connect(_on_hit_sfx)
 	$Center/Panel/Margin/VBox/ResetBtn.pressed.connect(_on_reset)
 	$Center/Panel/Margin/VBox/BackBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
 	_refresh_labels()
@@ -29,6 +35,14 @@ func _on_off(v: float) -> void:
 	AppSettings.offset_ms = int(v)
 	AppSettings.save_settings()
 	_refresh_labels()
+
+func _on_vibrate(on: bool) -> void:
+	AppSettings.vibration_enabled = on
+	AppSettings.save_settings()
+
+func _on_hit_sfx(on: bool) -> void:
+	AppSettings.hit_sfx_enabled = on
+	AppSettings.save_settings()
 
 func _on_reset() -> void:
 	AppSettings.reset_offset()

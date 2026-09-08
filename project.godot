@@ -1,4 +1,10 @@
-; 9-Dot Game — Godot. Portrait nine-grid rhythm (Tap / Slide).
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -6,7 +12,7 @@ config_version=5
 
 config/name="9-Dot Game"
 config/description="Nine-dot Tap/Slide rhythm. Entry /games/9dot-music/."
-config/version="0.5.0"
+config/version="0.6.1"
 run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
@@ -21,26 +27,26 @@ PlaySession="*res://scripts/play_session.gd"
 
 window/size/viewport_width=360
 window/size/viewport_height=640
-window/size/mode=0
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation=1
 
-[rendering]
+[dotnet]
 
-renderer/rendering_method="mobile"
-renderer/rendering_method.mobile="mobile"
-renderer/rendering_method.web="gl_compatibility"
-textures/vram_compression/import_etc2_astc=true
-
-[gui]
-
-theme/custom_font="res://addons/sa2kit_godot/fonts/SourceHanSansCN-Regular.otf"
+project/assembly_name="9-Dot Game"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/sa2kit_godot/plugin.cfg")
 
+[gui]
+
+theme/custom_font="res://addons/sa2kit_godot/fonts/SourceHanSansCN-Regular.otf"
+
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

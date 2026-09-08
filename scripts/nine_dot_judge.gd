@@ -12,6 +12,15 @@ static func grade_for_delta_ms(abs_delta: int) -> int:
 		return NineDotConfig.Grade.GOOD
 	return NineDotConfig.Grade.MISS
 
+static func grade_for_slide_delta_ms(abs_delta: int) -> int:
+	if abs_delta <= NineDotConfig.SLIDE_PERFECT_MS:
+		return NineDotConfig.Grade.PERFECT
+	if abs_delta <= NineDotConfig.SLIDE_GREAT_MS:
+		return NineDotConfig.Grade.GREAT
+	if abs_delta <= NineDotConfig.SLIDE_GOOD_MS:
+		return NineDotConfig.Grade.GOOD
+	return NineDotConfig.Grade.MISS
+
 static func grade_name(g: int) -> String:
 	match g:
 		NineDotConfig.Grade.PERFECT:
@@ -22,6 +31,14 @@ static func grade_name(g: int) -> String:
 			return "Good"
 		_:
 			return "Miss"
+
+## signed_delta_ms = now - tMs (negative = Early).
+static func feedback_label(grade: int, signed_delta_ms: int) -> String:
+	var name := grade_name(grade)
+	if grade == NineDotConfig.Grade.MISS or grade == NineDotConfig.Grade.PERFECT:
+		return name
+	var side := "Early" if signed_delta_ms < 0 else "Late"
+	return "%s %s" % [name, side]
 
 static func grade_weight(g: int) -> float:
 	match g:

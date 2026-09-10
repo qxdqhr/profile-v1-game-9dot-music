@@ -49,6 +49,7 @@ var _tex_play: Texture2D
 func _ready() -> void:
 	custom_minimum_size = Vector2(NineDotConfig.VIEW_W, NineDotConfig.VIEW_H)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	NineDotTheme.apply_to(self)
 	_diff_key = PlaySession.diff if String(PlaySession.diff) != "" else "normal"
 	_meta_path = PlaySession.meta_path if String(PlaySession.meta_path) != "" else FALLBACK_META
 	_tex_pause = load("res://assets/icons/pause.svg") as Texture2D
@@ -66,10 +67,16 @@ func _ready() -> void:
 	_start_btn.pressed.connect(_on_start)
 	_retry_btn.pressed.connect(_on_retry)
 	_back_btn.pressed.connect(_on_back)
+	_start_btn.theme_type_variation = &"PrimaryButton"
+	for b in [_start_btn, _retry_btn, _back_btn]:
+		NineDotUiJuice.wire_button_press_juice(b)
 	_pause_menu.visible = false
 	_pause_menu.gui_input.connect(_on_pause_menu_gui_input)
 	_grid_layer.draw.connect(_draw_grid)
 	_grid_layer.gui_input.connect(_on_grid_gui_input)
+	# Non-interactive HUD chrome must not steal touches (godot-ui-containers).
+	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rebuild_geometry()
 	_reset_to_ready()
 	get_viewport().size_changed.connect(_rebuild_geometry)
@@ -260,6 +267,8 @@ func _set_feedback(text: String, hold: bool = true) -> void:
 	_feedback = text
 	if hold:
 		_feedback_until_ms = _clock.now_ms() + NineDotConfig.FEEDBACK_HOLD_MS
+	_feedback_label.text = _feedback
+	NineDotUiJuice.pop_control(_feedback_label, 0.78)
 
 func _reject_feedback(text: String, pos: Vector2, soft: bool) -> void:
 	var now := _clock.now_ms()

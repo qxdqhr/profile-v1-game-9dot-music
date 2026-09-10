@@ -8,6 +8,7 @@ extends Control
 @onready var _hit_sfx: CheckButton = $Center/Panel/Margin/VBox/HitSfxCheck
 
 func _ready() -> void:
+	NineDotTheme.apply_to(self)
 	_vol.min_value = 0.0
 	_vol.max_value = 1.0
 	_vol.step = 0.01
@@ -24,7 +25,12 @@ func _ready() -> void:
 	_hit_sfx.toggled.connect(_on_hit_sfx)
 	$Center/Panel/Margin/VBox/ResetBtn.pressed.connect(_on_reset)
 	$Center/Panel/Margin/VBox/BackBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
+	for b in [$Center/Panel/Margin/VBox/ResetBtn, $Center/Panel/Margin/VBox/BackBtn]:
+		NineDotUiJuice.wire_button_press_juice(b)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_refresh_labels()
+	await get_tree().process_frame
+	NineDotUiJuice.enter_panel($Center/Panel)
 
 func _on_vol(v: float) -> void:
 	AppSettings.volume_linear = v

@@ -7,6 +7,7 @@ extends Control
 @onready var _hint: Label = $Center/Panel/Margin/VBox/Hint
 
 func _ready() -> void:
+	NineDotTheme.apply_to(self)
 	_bpm.min_value = 60
 	_bpm.max_value = 220
 	_bpm.value = 120
@@ -14,10 +15,16 @@ func _ready() -> void:
 	_dur.max_value = 60
 	_dur.value = 16
 	_url.placeholder_text = "https://www.bilibili.com/video/BVxxxx"
+	$Center/Panel/Margin/VBox/GenBtn.theme_type_variation = &"PrimaryButton"
 	$Center/Panel/Margin/VBox/GenBtn.pressed.connect(_on_generate)
 	$Center/Panel/Margin/VBox/PlayBtn.pressed.connect(_on_play)
 	$Center/Panel/Margin/VBox/BackBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
+	for b in [$Center/Panel/Margin/VBox/GenBtn, $Center/Panel/Margin/VBox/PlayBtn, $Center/Panel/Margin/VBox/BackBtn]:
+		NineDotUiJuice.wire_button_press_juice(b)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_hint.text = "MVP：不拉取真实 B 站流；用内置音视频 + 启发式谱面，打通「链接 → 可玩」管线。"
+	await get_tree().process_frame
+	NineDotUiJuice.enter_panel($Center/Panel)
 
 func _on_generate() -> void:
 	var url := _url.text.strip_edges()

@@ -136,6 +136,20 @@ npx skills add thedivergentai/gd-agentic-skills/skills/godot-genre-rhythm
 
 ---
 
+## 6. 已落地（v0.6.2 · GD Agentic P0）
+
+按 §4 P0 三件套落地，未整仓 symlink skill 脚本，只把模式收进游戏代码：
+
+| Skill 模式 | 落地 |
+|------------|------|
+| **godot-ui-theming** | `scripts/nine_dot_theme.gd`（`NineDotTheme`）：缓存 Theme、StyleBoxFlat、PrimaryButton variation、Palette 色；各场景 `apply_to(root)` |
+| **godot-tweening** | `scripts/nine_dot_ui_juice.gd`：kill-before-recreate、`enter_panel` / `pop_control` / 按钮 pulse / 菜单 stagger |
+| **godot-ui-containers** | 菜单按钮 `SIZE_EXPAND_FILL`；Play HUD/Feedback `mouse_filter = IGNORE`；overlay/非交互层 IGNORE |
+
+头一次加 `class_name` 脚本需带 `.uid` 并扫过文件系统（或开一次编辑器），否则 headless 会报 Identifier not declared。
+
+---
+
 ## 参考链接
 
 - https://github.com/thedivergentai/gd-agentic-skills  

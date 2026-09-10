@@ -14,81 +14,123 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.05, 0.08, 0.11, 1)
+color = Color(0.1, 0.14, 0.17, 1)
 mouse_filter = 2
 
-[node name="TopBar" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 56.0
-color = Color(0.08, 0.16, 0.2, 1)
-mouse_filter = 2
-
-[node name="TopTitle" type="Label" parent="TopBar"]
+[node name="Shell" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_font_sizes/font_size = 18
-text = "选歌"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/separation = 0
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="StatusBar" type="ColorRect" parent="Shell"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.12, 0.16, 0.2, 1)
+mouse_filter = 2
+
+[node name="StatusRow" type="HBoxContainer" parent="Shell/StatusBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 64.0
-offset_bottom = -12.0
-
-[node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(320, 520)
-layout_mode = 2
-
-[node name="Margin" type="MarginContainer" parent="Center/Panel"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="ListLabel" type="Label" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "曲目"
-
-[node name="List" type="VBoxContainer" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
+offset_left = 10.0
+offset_right = -10.0
 theme_override_constants/separation = 8
 
-[node name="Detail" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="StatusTitle" type="Label" parent="Shell/StatusBar/StatusRow"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.78, 0.85, 1)
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.85, 0.94, 0.9, 1)
+theme_override_font_sizes/font_size = 15
+text = "通讯录 · 曲目"
+vertical_alignment = 1
+
+[node name="StatusCount" type="Label" parent="Shell/StatusBar/StatusRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 0.78, 1)
+theme_override_font_sizes/font_size = 13
+text = "0/0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LcdFrame" type="PanelContainer" parent="Shell"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+
+[node name="LcdInner" type="VBoxContainer" parent="Shell/LcdFrame"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Scroll" type="ScrollContainer" parent="Shell/LcdFrame/LcdInner"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="Shell/LcdFrame/LcdInner/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="FocusStrip" type="ColorRect" parent="Shell/LcdFrame/LcdInner"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+color = Color(0.68, 0.8, 0.74, 1)
+mouse_filter = 2
+
+[node name="FocusLabel" type="Label" parent="Shell/LcdFrame/LcdInner/FocusStrip"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_right = -10.0
+theme_override_colors/font_color = Color(0.1, 0.22, 0.18, 1)
 theme_override_font_sizes/font_size = 12
+text = "—"
+vertical_alignment = 1
 autowrap_mode = 2
+clip_text = true
 
-[node name="DiffLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+[node name="SoftBar" type="ColorRect" parent="Shell"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "难度"
+color = Color(0.1, 0.14, 0.18, 1)
+mouse_filter = 2
 
-[node name="DiffBox" type="VBoxContainer" parent="Center/Panel/Margin/VBox"]
-layout_mode = 2
+[node name="SoftRow" type="HBoxContainer" parent="Shell/SoftBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
 theme_override_constants/separation = 6
 
-[node name="Hint" type="Label" parent="Center/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(280, 36)
+[node name="BackBtn" type="Button" parent="Shell/SoftBar/SoftRow"]
+custom_minimum_size = Vector2(72, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-autowrap_mode = 2
+size_flags_horizontal = 3
+text = "返回"
 
-[node name="BackBtn" type="Button" parent="Center/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(220, 40)
+[node name="DiffBtn" type="Button" parent="Shell/SoftBar/SoftRow"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "返回主界面"
+size_flags_horizontal = 3
+text = "Normal"
+
+[node name="PlayBtn" type="Button" parent="Shell/SoftBar/SoftRow"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "开始"

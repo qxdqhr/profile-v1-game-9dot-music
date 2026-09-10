@@ -22,7 +22,7 @@ func _ready() -> void:
 	$Center/Panel/Margin/VBox/RetryBtn.theme_type_variation = &"PrimaryButton"
 	$Center/Panel/Margin/VBox/RetryBtn.pressed.connect(_on_retry)
 	$Center/Panel/Margin/VBox/SongsBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/song_select.tscn"))
-	$Center/Panel/Margin/VBox/TitleBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/title.tscn"))
+	$Center/Panel/Margin/VBox/TitleBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/hub.tscn"))
 	for b in [$Center/Panel/Margin/VBox/RetryBtn, $Center/Panel/Margin/VBox/SongsBtn, $Center/Panel/Margin/VBox/TitleBtn]:
 		NineDotUiJuice.wire_button_press_juice(b)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL

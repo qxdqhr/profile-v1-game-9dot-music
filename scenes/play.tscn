@@ -20,14 +20,31 @@ anchor_bottom = 1.0
 color = Color(0.05, 0.07, 0.1, 1)
 mouse_filter = 2
 
-[node name="Video" type="VideoStreamPlayer" parent="."]
+[node name="VideoHost" type="Control" parent="."]
+clip_contents = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-expand = true
+
+[node name="Video" type="VideoStreamPlayer" parent="VideoHost"]
+visible = false
+layout_mode = 0
+offset_right = 2.0
+offset_bottom = 2.0
+mouse_filter = 2
+expand = false
 volume_db = -80.0
+
+[node name="VideoView" type="TextureRect" parent="VideoHost"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VideoDim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -48,26 +65,89 @@ mouse_filter = 0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="HUD" type="Label" parent="UI"]
+[node name="TitleFrame" type="PanelContainer" parent="UI"]
 offset_left = 12.0
 offset_top = 8.0
-offset_right = 280.0
-offset_bottom = 72.0
+offset_right = 300.0
+offset_bottom = 44.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 13
-text = "9-Dot Game"
+theme_type_variation = &"TitleFrame"
 
-[node name="Feedback" type="Label" parent="UI"]
-offset_left = 12.0
-offset_top = 560.0
-offset_right = 348.0
-offset_bottom = 600.0
+[node name="Margin" type="MarginContainer" parent="UI/TitleFrame"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 4
+
+[node name="TitleLabel" type="Label" parent="UI/TitleFrame/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "—"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="JudgeLabel" type="Label" parent="UI"]
+offset_left = 40.0
+offset_top = 52.0
+offset_right = 320.0
+offset_bottom = 88.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 26
 text = ""
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="UI"]
+offset_left = 40.0
+offset_top = 88.0
+offset_right = 320.0
+offset_bottom = 116.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 40.0
+offset_top = 116.0
+offset_right = 320.0
+offset_bottom = 140.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 15
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AccLabel" type="Label" parent="UI"]
+offset_left = 40.0
+offset_top = 140.0
+offset_right = 320.0
+offset_bottom = 162.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.82, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "0.0%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SongProgress" type="ProgressBar" parent="UI"]
+offset_top = 634.0
+offset_right = 360.0
+offset_bottom = 640.0
+mouse_filter = 2
+max_value = 1.0
+step = 0.0
+value = 0.0
+show_percentage = false
 
 [node name="Controls" type="HBoxContainer" parent="UI"]
 offset_left = 300.0

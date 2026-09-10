@@ -12,7 +12,7 @@ config_version=5
 
 config/name="9-Dot Game"
 config/description="Nine-dot Tap/Slide rhythm. Entry /games/9dot-music/."
-config/version="0.6.3"
+config/version="0.6.6"
 run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 Sa2kitCjk="*res://addons/sa2kit_godot/autoload/cjk_boot.gd"
 AppSettings="*res://scripts/app_settings.gd"
 PlaySession="*res://scripts/play_session.gd"
+SongLibrary="*res://scripts/songs/song_library.gd"
 
 [display]
 

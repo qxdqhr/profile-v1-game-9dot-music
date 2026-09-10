@@ -11,11 +11,12 @@
   "audio": {
     "path": "res://charts/bv19k-aimuji/audio.ogg"
   },
-  "video": {
-    "source": "builtin",
-    "path": "res://charts/bv19k-aimuji/video.ogv",
-    "cacheKey": "BV19k4R6jE6o"
-  },
+	"video": {
+		"source": "builtin",
+		"path": "res://charts/bv19k-aimuji/video.ogv",
+		"cacheKey": "BV19k4R6jE6o",
+		"aspect": 0.5625
+	},
   "difficulties": {
     "easy": {
       "file": "easy.json"

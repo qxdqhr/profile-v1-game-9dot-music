@@ -2,6 +2,7 @@ extends RefCounted
 class_name NineDotTheme
 ## Shared Theme for 9-Dot (gd-agentic: godot-ui-theming).
 ## Apply at each scene root — do not mutate StyleBoxes in place later without duplicate().
+## Call clear_cache() after editing theme builders during hot-reload sessions.
 
 const BG := Color(0.04, 0.07, 0.11, 1.0)
 const PANEL := Color(0.09, 0.13, 0.18, 0.96)
@@ -26,6 +27,9 @@ const PHONE_SELECT_FG := Color(0.95, 0.98, 1.0, 1.0)
 const PHONE_SOFT_BAR := Color(0.1, 0.14, 0.18, 1.0)
 
 static var _cached: Theme
+
+static func clear_cache() -> void:
+	_cached = null
 
 static func get_theme() -> Theme:
 	if _cached == null:
@@ -117,13 +121,71 @@ static func build() -> Theme:
 	t.set_color("font_disabled_color", "SoftKey", Color(0.5, 0.55, 0.58, 0.7))
 	t.set_font_size("font_size", "SoftKey", 13)
 
+	# Settings top tabs
+	t.set_type_variation("SettingsTab", "Button")
+	t.set_stylebox("normal", "SettingsTab", _flat(Color(0.12, 0.16, 0.2, 1), Color(0.35, 0.45, 0.5, 0.4), 10, 1, 10))
+	t.set_stylebox("hover", "SettingsTab", _flat(Color(0.18, 0.24, 0.3, 1), ACCENT_SLIDE, 10, 1, 10))
+	t.set_stylebox("pressed", "SettingsTab", _flat(Color(0.1, 0.14, 0.18, 1), ACCENT, 10, 1, 10))
+	t.set_stylebox("focus", "SettingsTab", _flat(Color(0.18, 0.24, 0.3, 1), FOCUS, 10, 1, 10))
+	t.set_color("font_color", "SettingsTab", TEXT_MUTED)
+	t.set_color("font_hover_color", "SettingsTab", TEXT)
+	t.set_color("font_pressed_color", "SettingsTab", TEXT)
+	t.set_font_size("font_size", "SettingsTab", 14)
+
+	t.set_type_variation("SettingsTabActive", "Button")
+	t.set_stylebox("normal", "SettingsTabActive", _flat(Color(0.55, 0.14, 0.32, 1), Color(1, 0.7, 0.85, 0.55), 10, 1, 10))
+	t.set_stylebox("hover", "SettingsTabActive", _flat(Color(0.65, 0.18, 0.38, 1), Color(1, 0.85, 0.9, 0.7), 10, 1, 10))
+	t.set_stylebox("pressed", "SettingsTabActive", _flat(Color(0.45, 0.1, 0.26, 1), ACCENT_SLIDE, 10, 1, 10))
+	t.set_stylebox("focus", "SettingsTabActive", _flat(Color(0.65, 0.18, 0.38, 1), FOCUS, 10, 1, 10))
+	t.set_color("font_color", "SettingsTabActive", Color(1, 0.96, 0.98, 1))
+	t.set_color("font_hover_color", "SettingsTabActive", Color(1, 1, 1, 1))
+	t.set_color("font_pressed_color", "SettingsTabActive", ACCENT_SLIDE)
+	t.set_font_size("font_size", "SettingsTabActive", 14)
+
 	t.set_stylebox("slider", "HSlider", _flat(Color(0.16, 0.2, 0.24, 1), PANEL_BORDER, 6, 1, 4))
 	t.set_stylebox("grabber_area", "HSlider", _flat(ACCENT, Color(0, 0, 0, 0), 6, 0, 0))
 	t.set_stylebox("grabber_area_highlight", "HSlider", _flat(Color(1.0, 0.4, 0.65, 1), Color(0, 0, 0, 0), 6, 0, 0))
 
+	# Play HUD: song title frame
+	t.set_type_variation("TitleFrame", "PanelContainer")
+	t.set_stylebox(
+		"panel",
+		"TitleFrame",
+		_flat(Color(0.06, 0.1, 0.14, 0.82), Color(0.95, 0.28, 0.55, 0.55), 8, 1, 8),
+	)
+
+	# Song progress (DIVA-like solid strip)
+	var prog_bg := StyleBoxFlat.new()
+	prog_bg.bg_color = Color(0.08, 0.1, 0.14, 0.85)
+	prog_bg.set_corner_radius_all(0)
+	prog_bg.set_content_margin_all(0)
+	var prog_fill := StyleBoxFlat.new()
+	prog_fill.bg_color = ACCENT
+	prog_fill.set_corner_radius_all(0)
+	prog_fill.set_content_margin_all(0)
+	t.set_stylebox("background", "ProgressBar", prog_bg)
+	t.set_stylebox("fill", "ProgressBar", prog_fill)
+	t.set_color("font_color", "ProgressBar", Color(0, 0, 0, 0))
+
 	t.set_stylebox("normal", "SpinBox", _flat(BTN, PANEL_BORDER, 8, 1, 8))
+
+	# CheckButton: do NOT inherit Button hover/pressed flats (ON looks pressed,
+	# hover then swaps to hover flat → feels reversed). Keep row chrome stable;
+	# on/off reads from font + switch icon only.
+	var check_row := _flat(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 8, 0, 8)
+	var check_row_hover := _flat(Color(1, 1, 1, 0.06), Color(0, 0, 0, 0), 8, 0, 8)
+	t.set_stylebox("normal", "CheckButton", check_row)
+	t.set_stylebox("pressed", "CheckButton", check_row)
+	t.set_stylebox("hover", "CheckButton", check_row_hover)
+	t.set_stylebox("hover_pressed", "CheckButton", check_row_hover)
+	t.set_stylebox("focus", "CheckButton", _flat(Color(1, 1, 1, 0.04), FOCUS, 8, 1, 8))
+	t.set_stylebox("disabled", "CheckButton", check_row)
 	t.set_color("font_color", "CheckButton", TEXT)
 	t.set_color("font_pressed_color", "CheckButton", ACCENT_SLIDE)
+	t.set_color("font_hover_color", "CheckButton", Color(1, 1, 1, 1))
+	t.set_color("font_hover_pressed_color", "CheckButton", Color(1.0, 0.88, 0.45, 1))
+	t.set_color("font_focus_color", "CheckButton", TEXT)
+	t.set_color("font_disabled_color", "CheckButton", Color(0.5, 0.55, 0.58, 0.7))
 
 	# Custom palette type for scripts / _draw
 	t.set_color("primary", "Palette", ACCENT)

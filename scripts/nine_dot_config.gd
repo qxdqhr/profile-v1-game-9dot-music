@@ -23,8 +23,21 @@ const SLIDE_OFF_BAND_GRACE_MS := 80
 
 const NODE_HIT_RADIUS_FRAC := 0.50
 const GRID_MARGIN := 28.0
-const GRID_TOP := 210.0
+## Bottom-aligned playfield — leave room for song progress bar.
+const GRID_BOTTOM_MARGIN := 32.0
 const GRID_SIZE := 304.0
+
+## Play HUD chrome (title frame + judge stack + DIVA-style progress).
+const TITLE_FRAME_TOP := 8.0
+const TITLE_FRAME_HEIGHT := 36.0
+const HUD_JUDGE_HEIGHT := 36.0
+const HUD_COMBO_HEIGHT := 28.0
+const HUD_SCORE_HEIGHT := 24.0
+const HUD_ACC_HEIGHT := 22.0
+const PROGRESS_BAR_HEIGHT := 6.0
+## Legacy aliases (band / feedback).
+const FEEDBACK_TOP := 52.0
+const FEEDBACK_HEIGHT := 36.0
 
 const HAPTIC_ARM_MS := 25
 const HAPTIC_COMPLETE_MS := 40

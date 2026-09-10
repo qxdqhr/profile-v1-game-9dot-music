@@ -1,10 +1,12 @@
 extends Control
-## Song select as 2000s flip-phone contacts (list-first + softkeys).
+## Song select as 2000s flip-phone contacts (grouped official / users + softkeys).
 
 const DIFF_ORDER: Array[String] = ["easy", "normal", "hard", "extreme"]
 
 @onready var _status_title: Label = $Shell/StatusBar/StatusRow/StatusTitle
 @onready var _status_count: Label = $Shell/StatusBar/StatusRow/StatusCount
+@onready var _refresh_btn: Button = $Shell/StatusBar/StatusRow/RefreshBtn
+@onready var _settings_btn: Button = $Shell/StatusBar/StatusRow/SettingsBtn
 @onready var _lcd_frame: PanelContainer = $Shell/LcdFrame
 @onready var _scroll: ScrollContainer = $Shell/LcdFrame/LcdInner/Scroll
 @onready var _list: VBoxContainer = $Shell/LcdFrame/LcdInner/Scroll/List
@@ -18,9 +20,12 @@ const DIFF_ORDER: Array[String] = ["easy", "normal", "hard", "extreme"]
 @onready var _status_bar: ColorRect = $Shell/StatusBar
 
 var _songs: Array = []
+var _groups: Array = []
+var _section_open: Dictionary = {} # category -> bool
 var _selected_idx: int = 0
 var _diff_idx: int = 1
 var _row_buttons: Array[Button] = []
+var _song_row_btns: Dictionary = {} # song_idx -> Button
 var _mode: String = "songs" # songs | diffs
 
 func _ready() -> void:
@@ -29,23 +34,39 @@ func _ready() -> void:
 	_back_btn.theme_type_variation = &"SoftKey"
 	_diff_btn.theme_type_variation = &"SoftKey"
 	_play_btn.theme_type_variation = &"SoftKey"
+	_refresh_btn.theme_type_variation = &"SoftKey"
+	_settings_btn.theme_type_variation = &"SoftKey"
 	_back_btn.pressed.connect(_on_soft_back)
 	_diff_btn.pressed.connect(_on_soft_diff)
 	_play_btn.pressed.connect(_on_soft_play)
-	for b in [_back_btn, _diff_btn, _play_btn]:
+	_refresh_btn.pressed.connect(_on_refresh)
+	_settings_btn.pressed.connect(_on_settings)
+	for b in [_back_btn, _diff_btn, _play_btn, _refresh_btn, _settings_btn]:
 		NineDotUiJuice.wire_button_press_juice(b)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_songs = NineDotCatalog.list_songs()
+	_refresh_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_settings_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_reload_library()
+	await get_tree().process_frame
+	NineDotUiJuice.enter_panel(_lcd_frame)
+
+func _reload_library() -> void:
+	SongLibrary.ensure_ready()
+	SongLibrary.refresh()
+	_groups = SongLibrary.list_grouped()
+	_songs = SongLibrary.list_songs()
+	for g in _groups:
+		var cat := String(g.get("category", ""))
+		if cat != "" and not _section_open.has(cat):
+			_section_open[cat] = true # default expanded
 	_build_song_list()
 	if _songs.is_empty():
 		_status_count.text = "0/0"
-		_focus_label.text = "未找到谱面（res://charts/*/meta.json）"
+		_focus_label.text = "未找到谱面（user://songs）"
 		_diff_btn.disabled = true
 		_play_btn.disabled = true
 	else:
-		_select_index(0)
-	await get_tree().process_frame
-	NineDotUiJuice.enter_panel(_lcd_frame)
+		_select_index(clampi(_selected_idx, 0, _songs.size() - 1))
 
 func _apply_phone_chrome() -> void:
 	_bg.color = NineDotTheme.PHONE_CHROME
@@ -55,7 +76,6 @@ func _apply_phone_chrome() -> void:
 	_status_title.add_theme_color_override("font_color", Color(0.85, 0.94, 0.9, 1))
 	_status_count.add_theme_color_override("font_color", Color(0.7, 0.85, 0.78, 1))
 	_focus_label.add_theme_color_override("font_color", NineDotTheme.PHONE_INK)
-	# LCD shell: flat mint panel, almost no radius (phone bezel)
 	var lcd := StyleBoxFlat.new()
 	lcd.bg_color = NineDotTheme.PHONE_LCD
 	lcd.border_color = NineDotTheme.PHONE_LCD_EDGE
@@ -70,13 +90,43 @@ func _build_song_list() -> void:
 	for c in _list.get_children():
 		c.queue_free()
 	_row_buttons.clear()
-	var i := 0
-	for song in _songs:
-		var btn := _make_contact_row(i, song)
-		_list.add_child(btn)
-		_row_buttons.append(btn)
-		i += 1
+	_song_row_btns.clear()
+	var flat_i := 0
+	for g in _groups:
+		var cat := String(g.get("category", ""))
+		var label := String(g.get("label", cat))
+		var songs: Array = g.get("songs", [])
+		var open := bool(_section_open.get(cat, true))
+		var header := _make_section_header(cat, label, songs.size(), open)
+		_list.add_child(header)
+		_row_buttons.append(header)
+		if not open:
+			continue
+		for song in songs:
+			var btn := _make_contact_row(flat_i, song)
+			_list.add_child(btn)
+			_row_buttons.append(btn)
+			_song_row_btns[flat_i] = btn
+			flat_i += 1
 	_refresh_soft_labels()
+
+func _make_section_header(category: String, label: String, count: int, open: bool) -> Button:
+	var btn := Button.new()
+	btn.theme_type_variation = &"SoftKey"
+	btn.custom_minimum_size = Vector2(0, 40)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.text = "%s %s（%d）" % ["▾" if open else "▸", label, count]
+	btn.pressed.connect(func(): _toggle_section(category))
+	NineDotUiJuice.wire_button_press_juice(btn)
+	return btn
+
+func _toggle_section(category: String) -> void:
+	_section_open[category] = not bool(_section_open.get(category, true))
+	_build_song_list()
+	if not _songs.is_empty():
+		_apply_song_highlight()
+		_ensure_row_visible(_selected_idx)
 
 func _make_contact_row(index: int, song: Dictionary) -> Button:
 	var btn := Button.new()
@@ -113,7 +163,6 @@ func _on_row_pressed(index: int) -> void:
 		_refresh_focus_strip()
 		_refresh_soft_labels()
 		return
-	# Second tap on focused contact opens Options (难度), like flip-phone.
 	if index == _selected_idx:
 		_open_diff_book()
 		return
@@ -124,7 +173,7 @@ func _select_index(index: int) -> void:
 		return
 	_selected_idx = index
 	var song: Dictionary = _songs[index]
-	PlaySession.select_chart(String(song.get("id", "")), String(song.get("_metaPath", "")))
+	PlaySession.select_entry(song)
 	_clamp_diff_to_available()
 	_apply_song_highlight()
 	_refresh_status()
@@ -133,11 +182,11 @@ func _select_index(index: int) -> void:
 	_ensure_row_visible(_selected_idx)
 
 func _apply_song_highlight() -> void:
-	for i in range(_row_buttons.size()):
-		var btn := _row_buttons[i]
+	for i in _song_row_btns.keys():
+		var btn: Button = _song_row_btns[i]
 		if not is_instance_valid(btn):
 			continue
-		btn.theme_type_variation = &"ContactRowSelected" if i == _selected_idx else &"ContactRow"
+		btn.theme_type_variation = &"ContactRowSelected" if int(i) == _selected_idx else &"ContactRow"
 
 func _apply_diff_highlight() -> void:
 	for i in range(_row_buttons.size()):
@@ -158,10 +207,10 @@ func _refresh_focus_strip() -> void:
 		_focus_label.text = "难度 %s · %s" % [key.capitalize(), "可玩" if avail else "未实装"]
 		return
 	var song: Dictionary = _songs[_selected_idx]
-	_focus_label.text = "BPM %s · 偏移 %sms · %s" % [
+	_focus_label.text = "%s · BPM %s · 偏移 %sms" % [
+		SongLibrary.category_label(SongLibrary.entry_category(song)),
 		str(song.get("bpm", "?")),
 		str(song.get("offsetMs", 0)),
-		String((song.get("video", {}) as Dictionary).get("source", "none")),
 	]
 
 func _refresh_soft_labels() -> void:
@@ -205,25 +254,33 @@ func _ensure_row_visible(index: int) -> void:
 	call_deferred("_scroll_to_row", index)
 
 func _scroll_to_row(index: int) -> void:
-	if index < 0 or index >= _row_buttons.size():
+	if not _song_row_btns.has(index):
 		return
-	var btn := _row_buttons[index]
+	var btn: Button = _song_row_btns[index]
 	if not is_instance_valid(btn):
 		return
 	_scroll.ensure_control_visible(btn)
+
+func _on_refresh() -> void:
+	_focus_label.text = "刷新曲库…"
+	_reload_library()
+	_focus_label.text = "已刷新 · %d 首" % _songs.size()
+	NineDotUiJuice.pulse_button(_refresh_btn)
+
+func _on_settings() -> void:
+	PlaySession.open_settings_from("res://scenes/song_select.tscn")
 
 func _on_soft_back() -> void:
 	if _mode == "diffs":
 		_build_song_list()
 		_select_index(_selected_idx)
 		return
-	get_tree().change_scene_to_file("res://scenes/title.tscn")
+	get_tree().change_scene_to_file("res://scenes/hub.tscn")
 
 func _on_soft_diff() -> void:
 	if _songs.is_empty():
 		return
 	if _mode == "diffs":
-		# Confirm highlight stays; treat as "select this difficulty"
 		_refresh_soft_labels()
 		NineDotUiJuice.pulse_button(_diff_btn)
 		return
@@ -235,6 +292,7 @@ func _open_diff_book() -> void:
 	for c in _list.get_children():
 		c.queue_free()
 	_row_buttons.clear()
+	_song_row_btns.clear()
 	var song: Dictionary = _songs[_selected_idx]
 	var diffs: Dictionary = song.get("difficulties", {})
 	for i in range(DIFF_ORDER.size()):
@@ -258,7 +316,17 @@ func _open_diff_book() -> void:
 	_apply_diff_highlight()
 	_refresh_focus_strip()
 	_refresh_soft_labels()
-	_ensure_row_visible(_diff_idx)
+	_ensure_diff_row_visible(_diff_idx)
+
+func _ensure_diff_row_visible(index: int) -> void:
+	call_deferred("_scroll_to_diff_row", index)
+
+func _scroll_to_diff_row(index: int) -> void:
+	if index < 0 or index >= _row_buttons.size():
+		return
+	var btn := _row_buttons[index]
+	if is_instance_valid(btn):
+		_scroll.ensure_control_visible(btn)
 
 func _on_soft_play() -> void:
 	if _songs.is_empty():
@@ -268,10 +336,11 @@ func _on_soft_play() -> void:
 		_focus_label.text = "该难度不可用 — 按中间键换难度"
 		return
 	var song: Dictionary = _songs[_selected_idx]
-	var path := NineDotCatalog.notes_path_for(song, key)
+	var path := SongLibrary.notes_path_for(song, key)
 	if path.is_empty():
 		_focus_label.text = "该难度不可用"
 		return
+	PlaySession.select_entry(song)
 	PlaySession.select_diff(key)
 	get_tree().change_scene_to_file("res://scenes/play.tscn")
 
@@ -300,7 +369,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func _nudge(delta: int) -> void:
 	if _mode == "diffs":
 		var next := clampi(_diff_idx + delta, 0, DIFF_ORDER.size() - 1)
-		# skip disabled
 		var guard := 0
 		while guard < DIFF_ORDER.size() and not _diff_available(_diff_key_at(next)):
 			next = clampi(next + delta, 0, DIFF_ORDER.size() - 1)
@@ -308,7 +376,7 @@ func _nudge(delta: int) -> void:
 			if next == _diff_idx:
 				break
 		_on_row_pressed(next)
-		_ensure_row_visible(_diff_idx)
+		_ensure_diff_row_visible(_diff_idx)
 		return
 	if _songs.is_empty():
 		return

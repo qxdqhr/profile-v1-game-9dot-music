@@ -3,8 +3,7 @@ extends Control
 
 enum Status { READY, PLAYING, PAUSED, ENDED }
 
-const FALLBACK_META := "res://charts/song-metronome-001/meta.json"
-const FALLBACK_NOTES := "res://charts/song-metronome-001/normal.json"
+const FALLBACK_KEY := "official/song-metronome-001"
 const HIT_FX_MS := 280
 const ARROW_COUNT := 5
 
@@ -22,14 +21,19 @@ var _feedback := ""
 var _clock: NineDotClock
 var _fingers: Dictionary = {}
 var _diff_key := "normal"
-var _meta_path := FALLBACK_META
+var _meta_path := ""
 var _hit_fx: Array = []
 var _sfx: AudioStreamPlayer
 var _feedback_until_ms: int = 0
 var _last_empty_fb_ms: int = -99999
 
-@onready var _hud: Label = $UI/HUD
-@onready var _feedback_label: Label = $UI/Feedback
+@onready var _title_frame: PanelContainer = $UI/TitleFrame
+@onready var _title_label: Label = $UI/TitleFrame/Margin/TitleLabel
+@onready var _judge_label: Label = $UI/JudgeLabel
+@onready var _combo_label: Label = $UI/ComboLabel
+@onready var _score_label: Label = $UI/ScoreLabel
+@onready var _acc_label: Label = $UI/AccLabel
+@onready var _song_progress: ProgressBar = $UI/SongProgress
 @onready var _pause_btn: TextureButton = $UI/Controls/PauseBtn
 @onready var _pause_menu: ColorRect = $UI/PauseMenu
 @onready var _restart_btn: TextureButton = $UI/PauseMenu/Row/RestartBtn
@@ -40,18 +44,29 @@ var _last_empty_fb_ms: int = -99999
 @onready var _retry_btn: Button = $UI/Overlay/VBox/RetryBtn
 @onready var _back_btn: Button = $UI/Overlay/VBox/BackBtn
 @onready var _audio: AudioStreamPlayer = $AudioStreamPlayer
-@onready var _video: VideoStreamPlayer = $Video
+@onready var _video: VideoStreamPlayer = $VideoHost/Video
+@onready var _video_view: TextureRect = $VideoHost/VideoView
+@onready var _video_host: Control = $VideoHost
 @onready var _grid_layer: Control = $GridLayer
+@onready var _controls: HBoxContainer = $UI/Controls
 
 var _tex_pause: Texture2D
 var _tex_play: Texture2D
+var _video_aspect: float = 16.0 / 9.0
+var _last_combo: int = -1
+var _HudLayout = preload("res://scripts/play_hud_layout.gd")
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(NineDotConfig.VIEW_W, NineDotConfig.VIEW_H)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	NineDotTheme.apply_to(self)
+	var th := NineDotTheme.get_theme()
+	if _title_frame:
+		_title_frame.theme = th
+	if _song_progress:
+		_song_progress.theme = th
 	_diff_key = PlaySession.diff if String(PlaySession.diff) != "" else "normal"
-	_meta_path = PlaySession.meta_path if String(PlaySession.meta_path) != "" else FALLBACK_META
+	_meta_path = PlaySession.meta_path
 	_tex_pause = load("res://assets/icons/pause.svg") as Texture2D
 	_tex_play = load("res://assets/icons/play.svg") as Texture2D
 	_audio.volume_db = linear_to_db(maxi(0.001, AppSettings.volume_linear))
@@ -75,35 +90,123 @@ func _ready() -> void:
 	_grid_layer.draw.connect(_draw_grid)
 	_grid_layer.gui_input.connect(_on_grid_gui_input)
 	# Non-interactive HUD chrome must not steal touches (godot-ui-containers).
-	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for c in [_title_frame, _judge_label, _combo_label, _score_label, _acc_label, _song_progress]:
+		if c:
+			c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rebuild_geometry()
 	_reset_to_ready()
 	get_viewport().size_changed.connect(_rebuild_geometry)
 
 func _notes_path() -> String:
-	var path := NineDotCatalog.notes_path_for(_meta, _diff_key)
+	var path := SongLibrary.notes_path_for(_meta, _diff_key)
 	if path != "":
 		return path
-	var enriched := _meta.duplicate()
-	if not enriched.has("_dir"):
-		enriched["_dir"] = String(_meta.get("id", "song-metronome-001"))
-	path = NineDotCatalog.notes_path_for(enriched, _diff_key)
-	return path if path != "" else FALLBACK_NOTES
+	var fb := SongLibrary.get_by_key(FALLBACK_KEY)
+	if not fb.is_empty():
+		return SongLibrary.notes_path_for(fb, "normal")
+	return ""
 
 func _rebuild_geometry() -> void:
 	_grid_size = minf(NineDotConfig.GRID_SIZE, size.x - NineDotConfig.GRID_MARGIN * 2.0)
-	_origin = Vector2((size.x - _grid_size) * 0.5, NineDotConfig.GRID_TOP)
+	var grid_top := size.y - NineDotConfig.GRID_BOTTOM_MARGIN - _grid_size
+	_origin = Vector2((size.x - _grid_size) * 0.5, grid_top)
 	_centers = NineDotGeometry.node_centers(_origin, _grid_size)
 	_cell = NineDotGeometry.cell_size(_grid_size)
 	_band = NineDotGeometry.slide_band_half_width(_cell)
 	_node_r = _cell * NineDotConfig.NODE_HIT_RADIUS_FRAC
+	_layout_feedback_bar()
+	_apply_video_fit_layout()
 	_grid_layer.queue_redraw()
 
+func _layout_feedback_bar() -> void:
+	_HudLayout.apply(
+		AppSettings.hud_layout,
+		size,
+		_title_frame,
+		_judge_label,
+		_combo_label,
+		_score_label,
+		_acc_label,
+		_song_progress,
+		_controls,
+	)
+
+func _video_aspect_ratio() -> float:
+	# Prefer live frame size (handles portrait vs landscape masters).
+	if _video and _video.stream:
+		var tex: Texture2D = _video.get_video_texture()
+		if tex and tex.get_height() > 0:
+			return float(tex.get_width()) / float(tex.get_height())
+	var vmeta: Dictionary = _meta.get("video", {}) if typeof(_meta.get("video", {})) == TYPE_DICTIONARY else {}
+	if vmeta.has("aspect"):
+		var a := float(vmeta.get("aspect", 0.0))
+		if a > 0.01:
+			return a
+	return _video_aspect if _video_aspect > 0.01 else (16.0 / 9.0)
+
+## Host region + TextureRect stretch — never squash via VideoStreamPlayer.expand.
+func _apply_video_fit_layout() -> void:
+	if _video_host == null or _video_view == null or _video == null:
+		return
+	var sw := size.x
+	var sh := size.y
+	if sw <= 1.0 or sh <= 1.0:
+		return
+	_video_aspect = _video_aspect_ratio()
+	var mode := AppSettings.video_fit
+	_video.visible = true
+	_video.modulate = Color(1, 1, 1, 0)
+	_video.expand = false
+	_video.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_video.size = Vector2(2, 2)
+	_video.custom_minimum_size = Vector2(2, 2)
+	_video_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_video_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_video_view.modulate = Color(1, 1, 1, 1)
+	match mode:
+		AppSettings.VIDEO_FIT_BAND:
+			# Cinema strip in the gap between feedback and bottom-aligned grid.
+			var grid_top := size.y - NineDotConfig.GRID_BOTTOM_MARGIN - _grid_size
+			var band_top := _HudLayout.metrics_bottom(AppSettings.hud_layout)
+			var band_max := maxf(0.0, grid_top - band_top - 8.0)
+			var band_h := minf(sw / maxf(_video_aspect, 0.01), band_max)
+			if _video_aspect < 1.0:
+				band_h = band_max
+			_video_host.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+			_video_host.offset_left = 0.0
+			_video_host.offset_right = 0.0
+			_video_host.offset_top = band_top
+			_video_host.offset_bottom = band_top + band_h
+			_video_host.clip_contents = true
+			_video_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_video_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		AppSettings.VIDEO_FIT_LETTERBOX:
+			_video_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_video_host.clip_contents = true
+			_video_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_video_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_:
+			_video_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_video_host.clip_contents = true
+			_video_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_video_view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+
+func _sync_video_view_texture() -> void:
+	if _video == null or _video_view == null or _video.stream == null:
+		if _video_view:
+			_video_view.texture = null
+		return
+	var tex: Texture2D = _video.get_video_texture()
+	if tex:
+		_video_view.texture = tex
+		var next_aspect := float(tex.get_width()) / maxf(float(tex.get_height()), 1.0)
+		if absf(next_aspect - _video_aspect) > 0.02:
+			_video_aspect = next_aspect
+			_apply_video_fit_layout()
+
 func _reset_to_ready() -> void:
-	_meta = NineDotChart.load_meta(_meta_path)
-	if not _meta.has("_dir"):
-		_meta["_dir"] = String(_meta.get("id", "song-metronome-001"))
+	_meta = _resolve_play_entry()
+	_meta_path = SongLibrary.entry_meta_path(_meta)
 	_notes = NineDotChart.load_notes(_notes_path())
 	_score = NineDotJudge.initial_score(_notes.size())
 	_status = Status.READY
@@ -122,12 +225,30 @@ func _reset_to_ready() -> void:
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
 	_prepare_streams(false)
+	_apply_video_fit_layout()
 	_update_hud()
 	_grid_layer.queue_redraw()
 
+func _resolve_play_entry() -> Dictionary:
+	SongLibrary.ensure_ready()
+	var entry := SongLibrary.get_by_key(PlaySession.library_key)
+	if entry.is_empty() and _meta_path != "":
+		entry = SongLibrary.get_by_meta_path(_meta_path)
+	if entry.is_empty() and PlaySession.meta_path != "":
+		entry = SongLibrary.get_by_meta_path(PlaySession.meta_path)
+	if entry.is_empty():
+		entry = SongLibrary.get_by_key(FALLBACK_KEY)
+	if entry.is_empty():
+		var all := SongLibrary.list_songs()
+		if not all.is_empty() and typeof(all[0]) == TYPE_DICTIONARY:
+			entry = all[0]
+	if entry.is_empty():
+		push_error("Play: no songs in library")
+	return entry
+
 func _prepare_streams(autoplay: bool) -> void:
-	var audio_path := String((_meta.get("audio", {}) as Dictionary).get("path", ""))
-	var video_path := String((_meta.get("video", {}) as Dictionary).get("path", ""))
+	var audio_path := SongLibrary.audio_path_for(_meta)
+	var video_path := SongLibrary.video_path_for(_meta)
 	var audio_stream := NineDotMedia.load_audio(audio_path)
 	if audio_stream == null:
 		var duration := int(_meta.get("durationMs", 16000))
@@ -139,6 +260,7 @@ func _prepare_streams(autoplay: bool) -> void:
 	_video.volume_db = -80.0
 	if autoplay:
 		NineDotMedia.start_av(_audio, _video)
+	call_deferred("_apply_video_fit_layout")
 
 func _on_start() -> void:
 	_notes = NineDotChart.load_notes(_notes_path())
@@ -154,6 +276,7 @@ func _on_start() -> void:
 	if _video.stream:
 		_video.play()
 		_video.stream_position = 0.0
+	call_deferred("_apply_video_fit_layout")
 	_status = Status.PLAYING
 	_overlay.visible = false
 	_pause_menu.visible = false
@@ -226,6 +349,8 @@ func _on_pause_menu_gui_input(event: InputEvent) -> void:
 		_leave_pause()
 
 func _process(_delta: float) -> void:
+	if _status == Status.PLAYING or _status == Status.PAUSED:
+		_sync_video_view_texture()
 	if _status == Status.PLAYING:
 		NineDotMedia.sync_video_to_audio(_audio, _video)
 		var now := _clock.now_ms()
@@ -267,11 +392,14 @@ func _set_feedback(text: String, hold: bool = true) -> void:
 	_feedback = text
 	if hold:
 		_feedback_until_ms = _clock.now_ms() + NineDotConfig.FEEDBACK_HOLD_MS
-	_feedback_label.text = _feedback
-	NineDotUiJuice.pop_control(_feedback_label, 0.78)
+	_judge_label.text = _feedback
+	NineDotUiJuice.pop_control(_judge_label, 0.78)
 
 func _reject_feedback(text: String, pos: Vector2, soft: bool) -> void:
 	var now := _clock.now_ms()
+	# Soft rejects must not clobber an active Perfect/Great/Good/Miss hold.
+	if soft and now < _feedback_until_ms and _is_grade_feedback(_feedback):
+		return
 	if now - _last_empty_fb_ms < NineDotConfig.EMPTY_FEEDBACK_COOLDOWN_MS:
 		return
 	_last_empty_fb_ms = now
@@ -282,6 +410,17 @@ func _reject_feedback(text: String, pos: Vector2, soft: bool) -> void:
 	else:
 		NineDotFeedback.play_miss(_sfx)
 		NineDotFeedback.vibrate_miss()
+
+func _is_grade_feedback(text: String) -> bool:
+	if text.is_empty():
+		return false
+	return (
+		text.begins_with("Perfect")
+		or text.begins_with("Great")
+		or text.begins_with("Good")
+		or text.begins_with("Miss")
+		or text.begins_with("Slide")
+	)
 
 func _prune_hit_fx(now: int) -> void:
 	var kept: Array = []
@@ -334,6 +473,9 @@ func _resolve(note: Dictionary, grade: int, fb: String, fx_pos: Vector2, play_au
 func _on_grid_gui_input(event: InputEvent) -> void:
 	if _status != Status.PLAYING:
 		return
+	# With emulate_touch_from_mouse, ScreenTouch already covers the press —
+	# handling Mouse* as well double-fires and overwrites Perfect with Empty.
+	var touch_emulated := bool(ProjectSettings.get_setting("input_devices/pointing/emulate_touch_from_mouse", false))
 	if event is InputEventScreenTouch:
 		var st := event as InputEventScreenTouch
 		if st.pressed:
@@ -344,6 +486,8 @@ func _on_grid_gui_input(event: InputEvent) -> void:
 		var sd := event as InputEventScreenDrag
 		_finger_move(sd.index, sd.position)
 	elif event is InputEventMouseButton:
+		if touch_emulated:
+			return
 		var mb := event as InputEventMouseButton
 		if mb.button_index != MOUSE_BUTTON_LEFT:
 			return
@@ -352,6 +496,8 @@ func _on_grid_gui_input(event: InputEvent) -> void:
 		else:
 			_finger_up(0, mb.position)
 	elif event is InputEventMouseMotion:
+		if touch_emulated:
+			return
 		var mm := event as InputEventMouseMotion
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			_finger_move(0, mm.position)
@@ -666,18 +812,27 @@ func _draw_grid() -> void:
 		_grid_layer.draw_circle(p, 6.0 * life, Color(col.r, col.g, col.b, life * 0.7))
 
 func _update_hud() -> void:
-	var now := 0
-	if _status == Status.PLAYING or _status == Status.PAUSED:
-		now = _clock.now_ms()
-	_hud.text = "%s\nScore %d\nCombo %d  Acc %.1f%%\n%d ms" % [
-		NineDotConfig.DISPLAY_NAME,
-		int(_score.get("score", 0)),
-		int(_score["combo"]),
-		NineDotJudge.accuracy_pct(_score),
-		now,
-	]
-	if _status == Status.PLAYING and now > _feedback_until_ms and _feedback_until_ms > 0:
-		# Keep last feedback until hold expires; do not clear mid-hold.
-		pass
-	_feedback_label.text = _feedback
+	var title := String(_meta.get("title", NineDotConfig.DISPLAY_NAME))
+	if _title_label:
+		_title_label.text = title if title != "" else NineDotConfig.DISPLAY_NAME
+	var combo := int(_score.get("combo", 0))
+	_combo_label.text = "%d" % combo if combo > 0 else ""
+	if combo != _last_combo and combo > 0:
+		NineDotUiJuice.pop_control(_combo_label, 0.85)
+	_last_combo = combo
+	_score_label.text = "%d" % int(_score.get("score", 0))
+	_acc_label.text = "%.1f%%" % NineDotJudge.accuracy_pct(_score)
+	_judge_label.text = _feedback
+	_update_song_progress()
 	_pause_btn.visible = _status == Status.PLAYING or _status == Status.PAUSED
+
+func _update_song_progress() -> void:
+	if _song_progress == null:
+		return
+	var duration := maxi(1, int(_meta.get("durationMs", 1)))
+	var now := 0
+	if _status == Status.PLAYING or _status == Status.PAUSED or _status == Status.ENDED:
+		if _clock:
+			now = clampi(_clock.now_ms(), 0, duration)
+	_song_progress.max_value = 1.0
+	_song_progress.value = float(now) / float(duration)

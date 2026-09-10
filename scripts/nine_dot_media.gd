@@ -3,22 +3,13 @@ class_name NineDotMedia
 ## Load builtin chart audio/video; keep video glued to audio timeline (anti-desync).
 
 const VIDEO_SYNC_TOLERANCE_SEC := 0.08
+const _MediaIo = preload("res://scripts/songs/song_media_io.gd")
 
 static func load_audio(path: String) -> AudioStream:
-	if path.is_empty() or path.begins_with("generated://"):
-		return null
-	if not ResourceLoader.exists(path):
-		push_warning("Audio missing: %s" % path)
-		return null
-	return load(path) as AudioStream
+	return _MediaIo.load_audio(path)
 
 static func load_video(path: String) -> VideoStream:
-	if path.is_empty() or path == "none":
-		return null
-	if not ResourceLoader.exists(path):
-		push_warning("Video missing: %s" % path)
-		return null
-	return load(path) as VideoStream
+	return _MediaIo.load_video(path)
 
 static func start_av(audio: AudioStreamPlayer, video: VideoStreamPlayer) -> void:
 	if audio and audio.stream:

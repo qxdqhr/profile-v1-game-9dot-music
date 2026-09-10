@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "bv1yt-hajimete",
+	"title": "ハジメテノオト",
+	"artist": "malo / 初音ミク",
+	"bpm": 109.0,
+	"offsetMs": 0,
+	"durationMs": 180117,
+	"sourceUrl": "https://www.bilibili.com/video/BV1yt411f7pj/?p=2",
+	"bvid": "BV1yt411f7pj",
+	"page": 2,
+	"part": "01.ハジメテノオト|最初的声音",
+	"audio": {
+		"path": "res://charts/bv1yt-hajimete/audio.ogg"
+	},
+	"video": {
+		"source": "builtin",
+		"path": "res://charts/bv1yt-hajimete/video.ogv",
+		"cacheKey": "BV1yt411f7pj-p2",
+		"aspect": 1.7778
+	},
+	"difficulties": {
+		"easy": {
+			"file": "easy.json"
+		},
+		"normal": {
+			"file": "normal.json"
+		},
+		"hard": {
+			"file": "hard.json"
+		},
+		"extreme": {
+			"file": "extreme.json"
+		}
+	}
+}

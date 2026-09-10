@@ -1,6 +1,8 @@
 extends Control
 ## Hub after splash: rhythm / MyRoom / settings / about.
 
+const _MyRoomPlatform = preload("res://scripts/myroom/myroom_platform.gd")
+
 func _ready() -> void:
 	NineDotTheme.apply_to(self)
 	$Hero/Brand.text = NineDotConfig.DISPLAY_NAME
@@ -9,7 +11,12 @@ func _ready() -> void:
 	var rhythm: Button = $Menu/RhythmBtn
 	rhythm.theme_type_variation = &"PrimaryButton"
 	rhythm.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/song_select.tscn"))
-	$Menu/MyRoomBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/my_room.tscn"))
+	var myroom: Button = $Menu/MyRoomBtn
+	if _MyRoomPlatform.is_available():
+		myroom.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/myroom/gate.tscn"))
+	else:
+		myroom.text = "MyRoom（仅 APK）"
+		myroom.disabled = true
 	$Menu/SettingsBtn.pressed.connect(func(): PlaySession.open_settings_from("res://scenes/hub.tscn"))
 	$Menu/AboutBtn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/about.tscn"))
 	for b in [$Menu/RhythmBtn, $Menu/MyRoomBtn, $Menu/SettingsBtn, $Menu/AboutBtn]:

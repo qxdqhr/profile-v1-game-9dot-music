@@ -368,7 +368,19 @@ func _end_play() -> void:
 	_clock.stop()
 	NineDotMedia.stop_av(_audio, _video)
 	PlaySession.store_result(String(_meta.get("title", "")), _score)
+	_notify_myroom_clear()
 	get_tree().change_scene_to_file("res://scenes/result.tscn")
+
+func _notify_myroom_clear() -> void:
+	# Official songs cleared on Normal or harder unlock MyRoom cast slots.
+	var key := String(PlaySession.library_key)
+	var diff := String(PlaySession.diff).to_lower()
+	if not key.begins_with("official/"):
+		return
+	if diff != "normal" and diff != "hard" and diff != "extreme":
+		return
+	var MyRoomProgressScript = preload("res://scripts/myroom/myroom_progress.gd")
+	MyRoomProgressScript.add_official_normal_clear()
 
 func _all_judged() -> bool:
 	for n in _notes:
@@ -431,7 +443,7 @@ func _prune_hit_fx(now: int) -> void:
 
 func _spawn_hit_fx(pos: Vector2, grade: int, is_slide: bool) -> void:
 	var now := _clock.now_ms()
-	var col := NineDotConfig.COLOR_SLIDE if is_slide else NineDotConfig.COLOR_TAP
+	var col := AppSettings.slide_color if is_slide else AppSettings.tap_color
 	if grade == NineDotConfig.Grade.MISS:
 		col = Color(0.55, 0.55, 0.6, 1.0)
 	elif grade == NineDotConfig.Grade.PERFECT:
@@ -732,19 +744,24 @@ func _draw_slide_arrows(ends: PackedVector2Array, until: int, tracking_prog: flo
 	if armed:
 		alpha = maxf(alpha, 0.9)
 	var phase := float(Time.get_ticks_msec()) * 0.004
-	var band_col := NineDotConfig.COLOR_SLIDE_SOFT
+	var m: Dictionary = AppSettings.slide_metrics()
+	var band_w := float(m.get("band", 10.0))
+	var chev := float(m.get("chevron", 9.0))
+	var stroke := float(m.get("stroke", 2.4))
+	var end_r := float(m.get("end", 7.0))
+	var band_col := AppSettings.slide_soft_color()
 	band_col.a = 0.25 + 0.35 * alpha
-	_grid_layer.draw_line(a, b, band_col, 10.0, true)
+	_grid_layer.draw_line(a, b, band_col, band_w, true)
 	for i in range(ARROW_COUNT):
 		var base := (float(i) / float(ARROW_COUNT) + phase)
 		base = base - floorf(base)
 		var t := base
 		# Dim arrows already "passed" relative to tracking progress when armed.
-		var col := NineDotConfig.COLOR_SLIDE
+		var col := AppSettings.slide_color
 		col.a = (0.35 + 0.65 * alpha) * (0.45 if t < tracking_prog else 1.0)
 		var p := a.lerp(b, t)
-		_draw_chevron(p, dir, 9.0, col, 2.4)
-	_grid_layer.draw_circle(a, 7.0, Color(NineDotConfig.COLOR_SLIDE, alpha))
+		_draw_chevron(p, dir, chev, col, stroke)
+	_grid_layer.draw_circle(a, end_r, Color(AppSettings.slide_color, alpha))
 
 func _draw_tap_fill(center: Vector2, until: int) -> void:
 	# fill 0 at approach start, 1 at tMs (until==0)
@@ -753,9 +770,9 @@ func _draw_tap_fill(center: Vector2, until: int) -> void:
 		fill = 1.0
 	var outer := _node_r * 1.08
 	var inner := outer * fill
-	_grid_layer.draw_arc(center, outer, 0, TAU, 56, Color(NineDotConfig.COLOR_TAP, 0.95), 3.2, true)
+	_grid_layer.draw_arc(center, outer, 0, TAU, 56, Color(AppSettings.tap_color, 0.95), 3.2, true)
 	if inner > 1.5:
-		var fill_c := NineDotConfig.COLOR_TAP_FILL
+		var fill_c := AppSettings.tap_fill_color()
 		fill_c.a = 0.25 + 0.5 * fill
 		_grid_layer.draw_circle(center, inner, fill_c)
 	if fill >= 0.98:

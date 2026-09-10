@@ -123,6 +123,71 @@ autowrap_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="NoteColorLabel" type="Label" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
+visible = false
+layout_mode = 2
+text = ""
+
+[node name="TapColorRow" type="HBoxContainer" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="TapColorCaption" type="Label" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/TapColorRow"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+text = "Tap"
+vertical_alignment = 1
+
+[node name="TapColorOption" type="OptionButton" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/TapColorRow"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_icon = true
+fit_to_longest_item = false
+
+[node name="SlideColorRow" type="HBoxContainer" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SlideColorCaption" type="Label" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideColorRow"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+text = "Slide"
+vertical_alignment = 1
+
+[node name="SlideColorOption" type="OptionButton" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideColorRow"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_icon = true
+fit_to_longest_item = false
+
+[node name="SlideWidthRow" type="HBoxContainer" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="SlideWidthCaption" type="Label" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideWidthRow"]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+text = "Width"
+vertical_alignment = 1
+
+[node name="SlideWidthOption" type="OptionButton" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideWidthRow"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_icon = true
+fit_to_longest_item = false
+
+[node name="ResetColorsBtn" type="Button" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "恢复默认 Note 样式"
+
 [node name="ResetBtn" type="Button" parent="Center/Panel/Margin/Root/Pages/GamePage/GameBody"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2

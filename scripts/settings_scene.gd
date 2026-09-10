@@ -19,6 +19,10 @@ extends Control
 @onready var _hit_sfx: CheckButton = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/HitSfxCheck
 @onready var _hud_layout: OptionButton = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/HudLayoutOption
 @onready var _hud_layout_label: Label = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/HudLayoutLabel
+@onready var _tap_color: OptionButton = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/TapColorRow/TapColorOption
+@onready var _slide_color: OptionButton = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideColorRow/SlideColorOption
+@onready var _slide_width: OptionButton = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/SlideWidthRow/SlideWidthOption
+@onready var _reset_colors_btn: Button = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/ResetColorsBtn
 @onready var _reset_btn: Button = $Center/Panel/Margin/Root/Pages/GamePage/GameBody/ResetBtn
 
 @onready var _video_fit: OptionButton = $Center/Panel/Margin/Root/Pages/VideoPage/VideoBody/VideoFitOption
@@ -55,21 +59,35 @@ func _ready() -> void:
 		_hud_layout.add_item(label)
 	_hud_layout.select(AppSettings.hud_layout_index())
 	_hud_layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fill_icon_options(_tap_color, AppSettings.make_color_option_icons())
+	_fill_icon_options(_slide_color, AppSettings.make_color_option_icons())
+	_fill_icon_options(_slide_width, AppSettings.make_slide_width_icons())
+	_tap_color.select(AppSettings.note_preset_index(AppSettings.tap_preset))
+	_slide_color.select(AppSettings.note_preset_index(AppSettings.slide_preset))
+	_slide_width.select(AppSettings.slide_width_index())
+	_tap_color.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slide_color.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slide_width.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_vol.value_changed.connect(_on_vol)
 	_off.value_changed.connect(_on_off)
 	_vibrate.toggled.connect(_on_vibrate)
 	_hit_sfx.toggled.connect(_on_hit_sfx)
 	_video_fit.item_selected.connect(_on_video_fit)
 	_hud_layout.item_selected.connect(_on_hud_layout)
+	_tap_color.item_selected.connect(_on_tap_color)
+	_slide_color.item_selected.connect(_on_slide_color)
+	_slide_width.item_selected.connect(_on_slide_width)
+	_reset_colors_btn.pressed.connect(_on_reset_colors)
 	_reset_btn.pressed.connect(_on_reset)
 	_back_btn.pressed.connect(func(): get_tree().change_scene_to_file(PlaySession.settings_back_scene))
 	_tab_game.pressed.connect(func(): _select_tab(Tab.GAME))
 	_tab_video.pressed.connect(func(): _select_tab(Tab.VIDEO))
 	_tab_audio.pressed.connect(func(): _select_tab(Tab.AUDIO))
-	for b in [_reset_btn, _back_btn, _tab_game, _tab_video, _tab_audio]:
+	for b in [_reset_btn, _reset_colors_btn, _back_btn, _tab_game, _tab_video, _tab_audio]:
 		NineDotUiJuice.wire_button_press_juice(b)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_reset_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_reset_colors_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_back_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for b in [_tab_game, _tab_video, _tab_audio]:
 		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -128,6 +146,30 @@ func _on_video_fit(idx: int) -> void:
 func _on_hud_layout(idx: int) -> void:
 	AppSettings.set_hud_layout_index(idx)
 	_refresh_labels()
+
+func _fill_icon_options(btn: OptionButton, icons: Array) -> void:
+	btn.clear()
+	for tex in icons:
+		if tex is Texture2D:
+			btn.add_icon_item(tex as Texture2D, "")
+		else:
+			btn.add_item("")
+
+func _on_tap_color(idx: int) -> void:
+	AppSettings.set_tap_preset_index(idx)
+
+func _on_slide_color(idx: int) -> void:
+	AppSettings.set_slide_preset_index(idx)
+
+func _on_slide_width(idx: int) -> void:
+	AppSettings.set_slide_width_index(idx)
+
+func _on_reset_colors() -> void:
+	AppSettings.reset_note_colors()
+	_tap_color.select(AppSettings.note_preset_index(AppSettings.tap_preset))
+	_slide_color.select(AppSettings.note_preset_index(AppSettings.slide_preset))
+	_slide_width.select(AppSettings.slide_width_index())
+	NineDotUiJuice.pulse_button(_reset_colors_btn)
 
 func _on_reset() -> void:
 	AppSettings.reset_offset()

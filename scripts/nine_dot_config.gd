@@ -49,9 +49,9 @@ const HAPTIC_MISS_AMP := 0.25
 const FEEDBACK_HOLD_MS := 420
 const EMPTY_FEEDBACK_COOLDOWN_MS := 120
 
-const COLOR_TAP := Color(0.95, 0.28, 0.55, 1.0)
+const COLOR_TAP := Color(0.95, 0.28, 0.55, 1.0) ## Default; runtime uses AppSettings.tap_color
 const COLOR_TAP_FILL := Color(0.95, 0.28, 0.55, 0.45)
-const COLOR_SLIDE := Color(1.0, 0.82, 0.22, 1.0)
+const COLOR_SLIDE := Color(1.0, 0.82, 0.22, 1.0) ## Default; runtime uses AppSettings.slide_color
 const COLOR_SLIDE_SOFT := Color(1.0, 0.82, 0.22, 0.55)
 
 enum Grade { PERFECT, GREAT, GOOD, MISS }

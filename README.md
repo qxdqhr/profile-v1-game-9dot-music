@@ -16,9 +16,10 @@ bash scripts/export-godot-game.sh 9dot-music
 
 ## 当前进度（摘要）
 
-- 流程：闪屏 → Hub（节奏游戏 / MyRoom stub / 设置 / 关于）
+- 流程：闪屏 → Hub（节奏游戏 / MyRoom M0·仅 APK / 设置 / 关于）
 - 玩法：Tap / Slide · 音频主时钟 · 视频跟随 · 四难度 · 百万计分
 - 曲库：`user://songs` + 首次 seed；模块 `scripts/songs/`（`SongLibrary`）
+- MyRoom：`scripts/myroom/` · M0–M6（含 AR Portrait/Live；详见 PLAN-MYROOM）
 - HUD：曲名标题框 · 判定柱 · 底进度条 · maimai 风格排布预设
 - 设置：顶部 Tab（游戏 / 视频 / 音量）
 - 曲目：Metronome Lab · 愛夢跡 · ハジメテノオト
@@ -29,7 +30,11 @@ bash scripts/export-godot-game.sh 9dot-music
 | 文档 | 内容 |
 |------|------|
 | [docs/FEATURES.md](docs/FEATURES.md) | **现有功能梳理**（实现快照） |
-| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | PRD |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 节奏玩法 PRD |
+| [docs/PLAN-MYROOM.md](docs/PLAN-MYROOM.md) | MyRoom 里程碑（M0–M6 已完成） |
+| [docs/REQUIREMENTS-MYROOM.md](docs/REQUIREMENTS-MYROOM.md) | **MyRoom / AR 需求（已 grill）** |
+| [docs/RESEARCH-MYROOM-DIVA.md](docs/RESEARCH-MYROOM-DIVA.md) | 歌姬 F / F2 Room + AR 调研 |
+| [docs/RESEARCH-MYROOM-MMD-LICENSE.md](docs/RESEARCH-MYROOM-MMD-LICENSE.md) | MMD 免费/许可现实 |
 | [docs/RESEARCH-EXTERNAL-SONGS.md](docs/RESEARCH-EXTERNAL-SONGS.md) | 外置曲库 |
 | [docs/RESEARCH-PLAY-HUD.md](docs/RESEARCH-PLAY-HUD.md) | Play HUD / 预设 |
 | [docs/RESEARCH-PORTRAIT-LANDSCAPE-VIDEO.md](docs/RESEARCH-PORTRAIT-LANDSCAPE-VIDEO.md) | 竖屏×横屏 PV |

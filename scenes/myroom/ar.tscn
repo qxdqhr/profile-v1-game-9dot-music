@@ -1,0 +1,151 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/myroom/myroom_ar_scene.gd" id="1"]
+
+[node name="MyRoomAR" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="CamBG" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="WorldHost" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 96.0
+offset_bottom = -100.0
+stretch = true
+mouse_filter = 0
+
+[node name="SubViewport" type="SubViewport" parent="WorldHost"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(360, 520)
+render_target_update_mode = 4
+
+[node name="World" type="Node3D" parent="WorldHost/SubViewport"]
+
+[node name="Camera3D" type="Camera3D" parent="WorldHost/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 0.96, 0.28, 0, -0.28, 0.96, 0, 1.1, 2.2)
+current = true
+fov = 42.0
+
+[node name="DirLight" type="DirectionalLight3D" parent="WorldHost/SubViewport/World"]
+transform = Transform3D(0.86, -0.35, 0.37, 0, 0.73, 0.68, -0.51, -0.59, 0.63, 0, 2, 0)
+light_energy = 1.15
+
+[node name="Fill" type="OmniLight3D" parent="WorldHost/SubViewport/World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.2, 1.0)
+light_color = Color(0.75, 0.88, 1, 1)
+light_energy = 0.4
+omni_range = 6.0
+
+[node name="Ground" type="MeshInstance3D" parent="WorldHost/SubViewport/World"]
+
+[node name="AvatarAnchor" type="Node3D" parent="WorldHost/SubViewport/World"]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="HBoxContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = 44.0
+theme_override_constants/separation = 8
+
+[node name="Status" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "AR"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="BackBtn" type="Button" parent="UI/TopBar"]
+custom_minimum_size = Vector2(72, 32)
+layout_mode = 2
+text = "返回"
+
+[node name="ModeRow" type="HBoxContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 48.0
+offset_right = -10.0
+offset_bottom = 88.0
+theme_override_constants/separation = 8
+
+[node name="PortraitBtn" type="Button" parent="UI/ModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Portrait"
+
+[node name="LiveBtn" type="Button" parent="UI/ModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Live"
+
+[node name="Hint" type="Label" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 90.0
+offset_right = -12.0
+offset_bottom = 118.0
+theme_override_font_sizes/font_size = 11
+text = "AR"
+autowrap_mode = 2
+mouse_filter = 2
+
+[node name="Bottom" type="VBoxContainer" parent="UI"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -96.0
+offset_right = -10.0
+offset_bottom = -8.0
+theme_override_constants/separation = 6
+
+[node name="ScaleLbl" type="Label" parent="UI/Bottom"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "缩放 1.00"
+
+[node name="ScaleSlider" type="HSlider" parent="UI/Bottom"]
+layout_mode = 2
+min_value = 0.4
+max_value = 2.2
+step = 0.05
+value = 1.0
+
+[node name="BtnRow" type="HBoxContainer" parent="UI/Bottom"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CaptureBtn" type="Button" parent="UI/Bottom/BtnRow"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "合影"
+
+[node name="IdleBtn" type="Button" parent="UI/Bottom/BtnRow"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "待机:开"

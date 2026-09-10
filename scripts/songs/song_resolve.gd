@@ -27,11 +27,18 @@ static func video_path(entry: Dictionary) -> String:
 	return resolve_media(entry, p)
 
 ## Absolute if contains ://; else relative to set root.
+## Official charts: prefer res://charts/<id>/<file> when present (APK-safe).
 static func resolve_media(entry: Dictionary, raw: String) -> String:
 	if raw.is_empty():
 		return ""
 	if raw.contains("://"):
 		return raw
+	var cat := _Entry.category_of(entry)
+	var song_id := String(entry.get("_id", entry.get("id", "")))
+	if cat == _Paths.CAT_OFFICIAL and song_id != "":
+		var res_path := "%s/%s/%s" % [_Paths.RES_CHARTS, song_id, raw.get_file() if raw.contains("/") else raw]
+		if ResourceLoader.exists(res_path) or FileAccess.file_exists(res_path):
+			return res_path
 	return join(entry, raw)
 
 static func join(entry: Dictionary, relative: String) -> String:

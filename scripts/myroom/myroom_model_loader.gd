@@ -1,10 +1,11 @@
 extends RefCounted
 class_name MyRoomModelLoader
-## Load user glTF/GLB or fall back to procedural / packed placeholder.
+## Load user glTF/GLB, bundled OC GLB, or procedural fallback.
 ## PMX: deferred — convert offline to glTF or plug Godot-MMD later.
 
 const _Paths = preload("res://scripts/myroom/myroom_paths.gd")
 const _Cast = preload("res://scripts/myroom/myroom_cast.gd")
+const _Avatar = preload("res://scripts/myroom/myroom_avatar.gd")
 
 static func spawn_avatar(parent: Node3D, slot_id: String = "miku") -> Node3D:
 	_Paths.ensure_dirs()
@@ -22,7 +23,15 @@ static func spawn_avatar(parent: Node3D, slot_id: String = "miku") -> Node3D:
 		var loaded := _load_gltf_scene(path)
 		if loaded:
 			parent.add_child(loaded)
-			return loaded
+			return _wrap_avatar(loaded, parent)
+	# Bundled OC GLB (res://).
+	if ResourceLoader.exists(_Paths.RES_OC_GLB) or FileAccess.file_exists(_Paths.RES_OC_GLB):
+		var oc := _load_gltf_scene(_Paths.RES_OC_GLB)
+		if oc:
+			# Soft tint hair-like materials toward slot color without destroying cream outfit.
+			_apply_hair_tint(oc, tint)
+			parent.add_child(oc)
+			return _wrap_avatar(oc, parent)
 	if ResourceLoader.exists(_Paths.RES_PLACEHOLDER_SCENE):
 		var packed := load(_Paths.RES_PLACEHOLDER_SCENE) as PackedScene
 		if packed:
@@ -35,27 +44,49 @@ static func spawn_avatar(parent: Node3D, slot_id: String = "miku") -> Node3D:
 	parent.add_child(built)
 	return built
 
+static func _wrap_avatar(root: Node3D, parent: Node3D) -> Node3D:
+	var helper := _Avatar.new()
+	helper.name = "MyRoomAvatarHelper"
+	root.add_child(helper)
+	helper.setup_from(root)
+	# Ensure parent already has root; return root for room rotation etc.
+	if root.get_parent() != parent and parent:
+		pass
+	return root
+
+static func _apply_hair_tint(root: Node3D, tint: Color) -> void:
+	_tint_meshes(root, tint, true)
+
 static func _apply_tint(root: Node3D, tint: Color) -> void:
-	for c in root.get_children():
-		if c is MeshInstance3D:
-			var mi := c as MeshInstance3D
-			if mi.material_override is StandardMaterial3D:
-				var mat := (mi.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
-				# Only recolor body-like teal materials roughly.
-				var a: Color = mat.albedo_color
-				if a.g > a.r and a.g > 0.5:
+	_tint_meshes(root, tint, false)
+
+static func _tint_meshes(n: Node, tint: Color, hair_only: bool) -> void:
+	if n is MeshInstance3D:
+		var mi := n as MeshInstance3D
+		if mi.material_override is StandardMaterial3D:
+			var mat := (mi.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
+			var a: Color = mat.albedo_color
+			if (not hair_only) or (a.g > a.r and a.g > 0.45 and a.b > 0.4):
+				if hair_only and a.g > a.r and a.g > 0.45:
 					mat.albedo_color = tint
 					mi.material_override = mat
+				elif not hair_only and a.g > a.r and a.g > 0.5:
+					mat.albedo_color = tint
+					mi.material_override = mat
+	for c in n.get_children():
+		_tint_meshes(c, tint, hair_only)
 
 static func _load_gltf_scene(path: String) -> Node3D:
 	if path.begins_with("res://"):
-		if not ResourceLoader.exists(path):
+		if ResourceLoader.exists(path):
+			var ps := load(path)
+			if ps is PackedScene:
+				var n: Node = (ps as PackedScene).instantiate()
+				return n as Node3D
 			return null
-		var ps := load(path)
-		if ps is PackedScene:
-			var n: Node = (ps as PackedScene).instantiate()
-			return n as Node3D
-		return null
+		# Fresh GLB may not be imported yet — try runtime parse.
+		if not FileAccess.file_exists(path):
+			return null
 	var doc := GLTFDocument.new()
 	var state := GLTFState.new()
 	var err := doc.append_from_file(path, state)
@@ -71,7 +102,7 @@ static func _load_gltf_scene(path: String) -> Node3D:
 		wrap.add_child(root)
 	return wrap
 
-## Simple OC silhouette (not Crypton Miku) — free to ship. Tint = slot color.
+## Simple OC silhouette fallback — free to ship. Tint = slot color.
 static func build_procedural_avatar(tint: Color = Color(0.45, 0.85, 0.78, 1.0)) -> Node3D:
 	var root := Node3D.new()
 	root.name = "PlaceholderAvatar"

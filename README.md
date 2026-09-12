@@ -19,7 +19,7 @@ bash scripts/export-godot-game.sh 9dot-music
 - 流程：闪屏 → Hub（节奏游戏 / MyRoom M0·仅 APK / 设置 / 关于）
 - 玩法：Tap / Slide · 音频主时钟 · 视频跟随 · 四难度 · 百万计分
 - 曲库：`user://songs` + 首次 seed；模块 `scripts/songs/`（`SongLibrary`）
-- MyRoom：`scripts/myroom/` · M0–M6（含 AR Portrait/Live；详见 PLAN-MYROOM）
+- MyRoom：`scripts/myroom/` · M0–M6；占位 OC `myroom/placeholder/oc_q.glb`（见 `art/myroom_oc/`）
 - HUD：曲名标题框 · 判定柱 · 底进度条 · maimai 风格排布预设
 - 设置：顶部 Tab（游戏 / 视频 / 音量）
 - 曲目：Metronome Lab · 愛夢跡 · ハジメテノオト

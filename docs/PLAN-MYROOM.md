@@ -47,9 +47,11 @@ Hub 只负责：`OS`/`Feature` 检测 → 进 `myroom_gate` 或提示「仅移�
 | `myroom_decor.gd` | 4 主题 + 3 家具 |
 | `myroom_onegai.gd` | 随机お願い |
 | `myroom_acchi.gd` / `myroom_alps.gd` | 两款迷你游戏 overlay |
-| `myroom_model_loader.gd` | glTF / 程序性 tint OC |
+| `myroom_model_loader.gd` | 用户 glTF → `res://myroom/placeholder/oc_q.glb` → 程序性回退 |
+| `myroom_avatar.gd` | Toon 材质 + idle / 眨眼 / smile·angry·sad |
 | `scenes/myroom/room.tscn` | 房间主 UI |
 | `play_scene._notify_myroom_clear` | 官方 NORMAL+ 通关 +1 |
+| `art/myroom_oc/` | Q-OC 管线（概念图分件 → Hunyuan 几何 + 色盘材质 / GLB） |
 
 | `myroom_camera.gd` | CameraServer 前摄 / 模拟背景回退 |
 | `myroom_ar_scene.gd` + `scenes/myroom/ar.tscn` | Portrait 合影 · Live 平面放置 · PNG 存 `user://myroom/photos/` |

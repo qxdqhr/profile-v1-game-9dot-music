@@ -6,6 +6,8 @@ const USER_ROOT := "user://myroom"
 const USER_MODELS := "user://myroom/models"
 const USER_PROGRESS := "user://myroom/progress.cfg"
 const RES_PLACEHOLDER_SCENE := "res://scenes/myroom/placeholder_avatar.tscn"
+## Bundled original Q-OC (Mint Ribbon) — APK-safe placeholder.
+const RES_OC_GLB := "res://myroom/placeholder/oc_q.glb"
 
 static func ensure_dirs() -> void:
 	DirAccess.make_dir_recursive_absolute(USER_ROOT)

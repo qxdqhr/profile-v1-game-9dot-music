@@ -70,7 +70,8 @@
 | 布置 | 4 主题色 · 简约/沙发/小舞台 |
 | お願い | 进房随机气泡；答应则系统选结果 |
 | 角色槽 | Miku 起；官方 NORMAL+ 通关 3/6/9/12/15 解锁其余 |
-| 模型 | 程序性 tint OC；`user://myroom/models/<id>/model.glb` |
+| 模型 | `res://myroom/placeholder/oc_q.glb` 原创 Q-OC（Mint Ribbon）；用户可覆盖 `user://myroom/models/`；无则程序性回退 |
+| Toon | `shaders/myroom_toon.gdshader` + `MyRoomAvatar` 眨眼/表情 |
 | AR | Portrait 合影 + Live 平面放置；摄像头或模拟背景；PNG→`user://myroom/photos/` |
 
 需求 / 计划：[REQUIREMENTS-MYROOM.md](REQUIREMENTS-MYROOM.md) · [PLAN-MYROOM.md](PLAN-MYROOM.md)。

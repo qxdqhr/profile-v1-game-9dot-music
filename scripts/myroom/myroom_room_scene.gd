@@ -36,6 +36,7 @@ const _Alps = preload("res://scripts/myroom/myroom_alps.gd")
 var _slot := "miku"
 var _comm
 var _avatar: Node3D
+var _avatar_helper: Node
 var _panel_host: Control
 var _angry_yaw := 0.0
 
@@ -174,6 +175,9 @@ func _respawn_avatar() -> void:
 	for c in _anchor.get_children():
 		c.queue_free()
 	_avatar = _Loader.spawn_avatar(_anchor, _slot)
+	_avatar_helper = null
+	if _avatar:
+		_avatar_helper = _avatar.find_child("MyRoomAvatarHelper", true, false)
 
 func _refresh_hud() -> void:
 	var name := _Cast.display_name(_slot)
@@ -199,10 +203,17 @@ func _on_segment(ok: bool, message: String, _added: int) -> void:
 	_msg.text = message
 	_msg.modulate = Color(0.7, 1.0, 0.8) if ok else Color(1.0, 0.75, 0.7)
 	_refresh_hud()
+	if _avatar_helper and _avatar_helper.has_method("pulse_expression"):
+		if ok:
+			_avatar_helper.pulse_expression("smile", 0.7)
+		else:
+			_avatar_helper.pulse_expression("sad", 0.5)
 
 func _on_anger(angry: bool) -> void:
 	_msg.text = "生气了…" if angry else "心情平复了"
 	_refresh_hud()
+	if _avatar_helper and _avatar_helper.has_method("pulse_expression"):
+		_avatar_helper.pulse_expression("angry" if angry else "smile", 0.9)
 
 func _on_fever_pressed() -> void:
 	if _comm.try_start_fever():
